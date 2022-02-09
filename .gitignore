@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# IDE files
+.vscode
+
+# Bundled code for online judge submission
+submissions/**/*.test.cpp

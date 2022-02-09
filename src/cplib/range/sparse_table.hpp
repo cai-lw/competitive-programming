@@ -3,36 +3,60 @@
 #include <cstdint>
 #include <utility>
 #include <vector>
-#include <iostream>
 #include "cplib/port/bit.hpp"
 
 namespace cplib {
 
-// Op must be associative, commutative and idempotent
+/**
+ * \brief \f$\langle O(N\log N), O(1) \rangle\f$ sparse table for specific binary operations like `min` and `gcd`.
+ * 
+ * \tparam T T Type of elements.
+ * \tparam Op A function object that takes two `T`'s and returns a `T`. Must be associative, commutative and idempotent.
+ */
 template<typename T, typename Op>
-struct SparseTable {
-    std::vector<std::vector<T>> table;
-    Op op;
-
+class SparseTable {
+public:
     using size_type = std::size_t;
 
-    SparseTable() {}
+    /** \copydoc SparseTable(InputIt, InputIt) */
+    SparseTable(const std::vector<T> &data) : op() {
+        table.emplace_back(data);
+        _build();
+    }
 
+    /** \copydoc SparseTable(InputIt, InputIt) */
     SparseTable(std::vector<T> &&data) : op() {
         table.emplace_back(data);
         _build();
     }
 
+    /**
+     * \brief Construct the sparse table from the given sequence. 
+     * 
+     * Makes \f$O(N\log N)\f$ calls to `Op` and creates \f$O(N\log N)\f$ copies of sequence elements.
+     */
     template<typename InputIt>
     SparseTable(InputIt first, InputIt last) : op() {
         table.emplace_back(first, last);
         _build();
     }
 
+    /** \brief Returns number of elements in the sequence */
     size_type size() {
         return table[0].size();
     }
 
+    /**
+     * \brief Iterated application of operator `Op` on elements in the 0-based half-open range [left, right).
+     * 
+     * If \f$\circ\f$ denotes `Op`, this returns \f$a_{left} \cdots a_{left+1} \circ \dots \circ a_{right-1}\f$.
+     * Time complexity is \f$O(1)\f$ and specfically `Op` is called at most once.
+     * 
+     * Undefined behavior if `left >= size()`, `right > size()` or `left >= right`.
+     * Note that empty range is not allowed.
+     * 
+     * \see range_inclusive
+     */
     T range(size_type left, size_type right) {
         int level = port::bit_width(right - left) - 1;
         size_type left2 = right - (size_type(1) << level);
@@ -42,11 +66,21 @@ struct SparseTable {
             return op(table[level][left], table[level][left2]);
     }
 
+    /**
+     * @brief Iterated application of operator `Op` on elements in the 0-based closed range [left, right].
+     * 
+     * Equivalent to `range(left, right + 1)`.
+     * 
+     * \see range
+     */
     T range_inclusive(size_type left, size_type right) {
         return range(left, right + 1);
     }
 
 private:
+    std::vector<std::vector<T>> table;
+    Op op;
+
     void _build() {
         size_type input_size = table.back().size();
         while (input_size > (size_type(1) << table.size()) - 1) {

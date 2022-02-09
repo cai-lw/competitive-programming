@@ -9,7 +9,10 @@
 
 namespace cplib {
 
-struct RangeMinBlock {
+namespace impl {
+
+class RangeMinBlock {
+public:
     using bitmap_t = std::uint_fast32_t;
     static constexpr int bitmap_size = std::numeric_limits<bitmap_t>::digits;
 
@@ -46,36 +49,73 @@ private:
     std::array<bitmap_t, bitmap_size> min_loc;
 };
 
-template<typename T, typename Comp = std::less<T>>
-struct RangeMinQuery {
-    struct MinOp {
-        Comp comp;
-        const T& operator()(const T& a, const T& b) {
-            return comp(a, b) ? a : b;
-        }
-    };
+template<typename T, typename Comp>
+struct MinOp {
+    Comp comp;
+    const T& operator()(const T& a, const T& b) {
+        return std::min(a, b, comp);
+    }
+};
 
-    static constexpr int block_size = RangeMinBlock::bitmap_size;
+}  // namespace impl
+
+/**
+ * \brief Efficient \f$\langle O(N), O(1) \rangle\f$ static range minimum query.
+ * 
+ * Divides input sequence into machine word sized blocks. Uses bit operations for in-block queries, and SparseTable for 
+ * inter-block queries. Under the transdichotomous model (\f$w\geq\log_2 N\f$ where \f$w=64\f$ is the word size),
+ * initialization takes \f$O(N)\f$ time.
+ * 
+ * \tparam T Type of elements.
+ * \tparam Comp Comparison function type that is passed to `std::min`. Must satisfy C++ named requirement
+ * [*Compare*](https://en.cppreference.com/w/cpp/named_req/Compare).
+ */
+template<typename T, typename Comp = std::less<T>>
+class RangeMinQuery {
+public:
+    static constexpr int block_size = impl::RangeMinBlock::bitmap_size;
     using size_type = std::size_t;
 
-    SparseTable<T, MinOp> block_table;
-    std::vector<RangeMinBlock> blocks;
-    std::vector<T> data;
-    MinOp min_op;
-
+    /** \copydoc RangeMinQuery::RangeMinQuery(InputIt, InputIt) */
     RangeMinQuery(const std::vector<T> &arr) : data(arr) { _build(); }
 
+    /** \copydoc RangeMinQuery::RangeMinQuery(InputIt, InputIt) */
     RangeMinQuery(std::vector<T> &&arr) : data(arr) { _build(); }
 
+    /**
+     * \brief Construct the range minumum query object from the given sequence. 
+     * 
+     * Makes \f$O(N)\f$ calls to `Comp` and creates \f$O(N)\f$ copies of sequence elements along with
+     * \f$O(N)\f$ integers as bit masks.
+     */
     template<typename InputIt>
     RangeMinQuery(InputIt first, InputIt last) : data(first, last) { _build(); }
 
+    /** \brief Returns number of elements in the sequence */
     size_type size() { return data.size(); }
 
+    /**
+     * \brief Returns the minimum element in the 0-based half-open range `[left, right)`.
+     *
+     * Returns \f$\min\{a_{left},a_{left+1},\dots,a_{right-1}\}\f$.
+     * Time complexity is \f$O(1)\f$ and specifically `Comp` is called at most 3 times.
+     *
+     * Undefined behavior if `left >= size()`, `right > size()` or `left >= right`.
+     * Note that empty range is not allowed.
+     * 
+     * \see range_min_inclusive
+     */
     T range_min(size_type left, size_type right) {
         return range_min_inclusive(left, right - 1);
     }
 
+    /**
+     * \brief Returns the minimum element in the 0-based closed range `[left, right]`.
+     * 
+     * Equivalent to `range_min(left, right + 1)`.
+     * 
+     * \see range_min
+     */
     T range_min_inclusive(size_type left, size_type right) {
         size_type left_block = left / block_size, right_block = right / block_size;
         if (left_block == right_block) {
@@ -86,15 +126,20 @@ struct RangeMinQuery {
         int right_block_idx = blocks[right_block].min_idx_inclusive(0, right % block_size);
         const T &left_block_min = data[left_block * block_size + left_block_idx];
         const T &right_block_min = data[right_block * block_size + right_block_idx];
-        const T &lr_block_min = min_op(left_block_min, right_block_min);
+        const T &lr_block_min = std::min(left_block_min, right_block_min, comp);
         if (left_block + 1 == right_block) {
             return lr_block_min;
         } else {
-            return min_op(lr_block_min, block_table.range_inclusive(left_block + 1, right_block - 1));
+            return std::min(lr_block_min, block_table.range_inclusive(left_block + 1, right_block - 1), comp);
         }
     }
 
 private:
+    SparseTable<T, impl::MinOp<T, Comp>> block_table;
+    std::vector<impl::RangeMinBlock> blocks;
+    std::vector<T> data;
+    Comp comp;
+
     void _build() {
         size_type num_blocks = (data.size() + block_size - 1) / block_size;
         Comp comp;
@@ -108,7 +153,7 @@ private:
         block_min.reserve(num_blocks);
         for (size_type i = 0; i < num_blocks; i++)
             block_min.push_back(data[i * block_size + blocks[i].min_idx_inclusive(0, block_size - 1)]);
-        block_table = SparseTable<T, MinOp>(move(block_min));
+        block_table = SparseTable<T, impl::MinOp<T, Comp>>(move(block_min));
     }
 };
 

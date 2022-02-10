@@ -8,7 +8,7 @@
 namespace cplib {
 
 /**
- * \brief \f$\langle O(N\log N), O(1) \rangle\f$ sparse table for specific binary operations like `min` and `gcd`.
+ * \brief \f$\langle O(N\log N), O(1) \rangle\f$ sparse table for certain binary operations like `min` and `gcd`.
  * 
  * \tparam T T Type of elements.
  * \tparam Op A function object that takes two `T`'s and returns a `T`. Must be associative, commutative and idempotent.
@@ -17,6 +17,9 @@ template<typename T, typename Op>
 class SparseTable {
 public:
     using size_type = std::size_t;
+
+    /** \brief Creates an empty sparse table. */
+    SparseTable() = default;
 
     /** \copydoc SparseTable(InputIt, InputIt) */
     SparseTable(const std::vector<T> &data) : op() {
@@ -47,7 +50,7 @@ public:
     }
 
     /**
-     * \brief Iterated application of operator `Op` on elements in the 0-based half-open range [left, right).
+     * \brief Iterated application of operator `Op` on elements in the 0-based half-open range `[left, right)`.
      * 
      * If \f$\circ\f$ denotes `Op`, this returns \f$a_{left} \cdots a_{left+1} \circ \dots \circ a_{right-1}\f$.
      * Time complexity is \f$O(1)\f$ and specfically `Op` is called at most once.
@@ -67,7 +70,7 @@ public:
     }
 
     /**
-     * @brief Iterated application of operator `Op` on elements in the 0-based closed range [left, right].
+     * @brief Iterated application of operator `Op` on elements in the 0-based closed range `[left, right]`.
      * 
      * Equivalent to `range(left, right + 1)`.
      * 

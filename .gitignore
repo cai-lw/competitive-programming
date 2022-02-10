@@ -36,3 +36,6 @@
 
 # Bundled code for online judge submission
 submissions/**/*.test.cpp
+
+# Build directory
+build

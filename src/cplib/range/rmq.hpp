@@ -16,8 +16,6 @@ public:
     using bitmap_t = std::uint_fast32_t;
     static constexpr int bitmap_size = std::numeric_limits<bitmap_t>::digits;
 
-    RangeMinBlock() {}
-
     template<typename InputIt, typename Comp>
     RangeMinBlock(InputIt first, InputIt last, Comp comp) {
         using T = typename std::iterator_traits<InputIt>::value_type;
@@ -40,7 +38,7 @@ public:
         }
     }
 
-    int min_idx_inclusive(int left, int right) {
+    int min_idx_inclusive(int left, int right) const {
         bitmap_t loc = min_loc[right] & ~((bitmap_t(1) << left) - 1);
         return loc == 0 ? right : port::countr_zero(loc);
     }
@@ -52,7 +50,7 @@ private:
 template<typename T, typename Comp>
 struct MinOp {
     Comp comp;
-    const T& operator()(const T& a, const T& b) {
+    const T& operator()(const T& a, const T& b) const {
         return std::min(a, b, comp);
     }
 };
@@ -95,7 +93,7 @@ public:
     RangeMinQuery(InputIt first, InputIt last) : data(first, last) { _build(); }
 
     /** \brief Returns number of elements in the sequence */
-    size_type size() { return data.size(); }
+    size_type size() const { return data.size(); }
 
     /**
      * \brief Returns the minimum element in the 0-based half-open range `[left, right)`.
@@ -108,7 +106,7 @@ public:
      * 
      * \see range_min_inclusive
      */
-    T range_min(size_type left, size_type right) {
+    T range_min(size_type left, size_type right) const {
         return range_min_inclusive(left, right - 1);
     }
 
@@ -119,7 +117,7 @@ public:
      * 
      * \see range_min
      */
-    T range_min_inclusive(size_type left, size_type right) {
+    T range_min_inclusive(size_type left, size_type right) const {
         size_type left_block = left / block_size, right_block = right / block_size;
         if (left_block == right_block) {
             int block_idx = blocks[left_block].min_idx_inclusive(left % block_size, right % block_size);

@@ -45,7 +45,7 @@ public:
     }
 
     /** \brief Returns number of elements in the sequence */
-    size_type size() {
+    size_type size() const {
         return table[0].size();
     }
 
@@ -60,7 +60,7 @@ public:
      * 
      * \see range_inclusive
      */
-    T range(size_type left, size_type right) {
+    T range(size_type left, size_type right) const {
         int level = port::bit_width(right - left) - 1;
         size_type left2 = right - (size_type(1) << level);
         if (left == left2)
@@ -76,7 +76,7 @@ public:
      * 
      * \see range
      */
-    T range_inclusive(size_type left, size_type right) {
+    T range_inclusive(size_type left, size_type right) const {
         return range(left, right + 1);
     }
 

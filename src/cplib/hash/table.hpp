@@ -52,8 +52,8 @@ struct HashCell {
  * Due to lazy deletion, there are two load factors, the larger "non-empty" load factor which counts cells marked
  * for deletion, and the smaller "occupied" load factor which doesn't.
  * The rehashing policy is that both load factors are always within \f$[\frac{1}{8},\frac{1}{2}]\f$, unless the
- * capacity is manually set (see HashTable::reserve). The lower is required for \f$O(N)\f$ traversal.
- * Additinoally, the capacity is always a power of two, and is at least 4.
+ * capacity is manually set (see HashTable::reserve). The lower bound is required for \f$O(N)\f$ traversal.
+ * In addition, the capacity is always a power of two, and is at least 4.
  * 
  * \tparam T Type of elements.
  * \tparam Hash Hash function object.

@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <cstring>
+#include <random>
 #include <string>
 
 namespace cplib {
@@ -57,49 +58,104 @@ static inline uint64_t wyhash64(uint64_t A, uint64_t B){ A^=0xa0761d6478bd642ful
 
 /* end of wyhash.h */
 
-static inline uint64_t wyhash_default(const void *key, size_t len) {
-    return wyhash(key, len, 0, _wyp);
+uint64_t gen_random_seed() {
+    std::random_device rd;
+    std::uniform_int_distribution<uint64_t> dis(0, std::numeric_limits<uint64_t>::max());
+    return dis(rd);
 }
-
-template<typename T>
-struct WyHashBitwise {
-    size_t operator()(const T& t) const {
-        return wyhash_default((void*)&t, sizeof(T));
-    }
-};
 
 }  // namespace impl
 
+/**
+ * \relates WyHash
+ * \brief Hash function for arbitrary bytes using wyhash.
+ * 
+ * Calls wyhash from https://github.com/wangyi-fudan/wyhash/blob/master/wyhash.h, with a random seed initialized
+ * from system random source on startup.
+ * 
+ * Wyhash is chosen for several characteristics that are specially suited for competitive programming:
+ * * One of the fastest general purpose hash functions as of 2022.
+ * * Very short implementation, little concern about code length limit.
+ * * No known simple attack that can be reasonably carried out during a contest.
+ * * Largely unknown in the competitive programming community, further reducing the likelihood of being hacked.
+ * 
+ * \see WyHash<std::string> an example of implementing WyHash specialization using this function.
+ */
+static inline uint64_t wyhash_bytes(const void *key, size_t len) {
+    static const uint64_t seed = impl::gen_random_seed();
+    return impl::wyhash(key, len, seed, impl::_wyp);
+}
+
+/**
+ * \relates WyHash
+ * \brief Combine two hash values to produce a new hash value.
+ * 
+ * Calls wyhash64 from https://github.com/wangyi-fudan/wyhash/blob/master/wyhash.h.
+ * 
+ * Use this to implement hash function for types with multiple fields that are recursively hashed, similar to how
+ * [boost::hash_combine](https://www.boost.org/doc/libs/1_78_0/doc/html/hash/combine.html) is used for the same purpose.
+ * 
+ * \see WyHash<std::pair<T1, T2>> an example of implementing WyHash specialization using this function.
+ */
+static inline uint64_t wyhash_combine(uint64_t a, uint64_t b) {
+    return impl::wyhash64(a, b);
+}
+
+/**
+ * \brief Hash function class like `std::hash` but uses wyhash.
+ * 
+ * Specializations for all [integral types](https://en.cppreference.com/w/cpp/types/is_integral) as well as
+ * `std::string` and `std::pair` are provided. For all other types, it must be specialized by the user.
+ * Specializations should be implemented in terms of ::wyhash_bytes, ::wyhash_combine, and other WyHash specializations.
+ * 
+ * \see WyHash<std::string>, WyHash<std::pair<T1, T2>>
+ */
 template<typename T>
 struct WyHash {};
 
-template<> struct WyHash<bool> : impl::WyHashBitwise<bool> {};
-template<> struct WyHash<char> : impl::WyHashBitwise<char> {};
-template<> struct WyHash<unsigned char> : impl::WyHashBitwise<unsigned char> {};
-template<> struct WyHash<signed char> : impl::WyHashBitwise<signed char> {};
-template<> struct WyHash<short> : impl::WyHashBitwise<short> {};
-template<> struct WyHash<int> : impl::WyHashBitwise<int> {};
-template<> struct WyHash<long> : impl::WyHashBitwise<long> {};
-template<> struct WyHash<long long> : impl::WyHashBitwise<long long> {};
-template<> struct WyHash<unsigned short> : impl::WyHashBitwise<unsigned short> {};
-template<> struct WyHash<unsigned int> : impl::WyHashBitwise<unsigned int> {};
-template<> struct WyHash<unsigned long> : impl::WyHashBitwise<unsigned long> {};
-template<> struct WyHash<unsigned long long> : impl::WyHashBitwise<unsigned long long> {};
-
+/** \brief WyHash specialization for `std::string`. */
 template<>
 struct WyHash<std::string> {
     size_t operator()(const std::string& s) const {
-        return impl::wyhash_default(s.c_str(), s.size());
+        return wyhash_bytes(s.c_str(), s.size());
     }
 };
 
+/**
+ * \brief WyHash specialization for `std::pair`.
+ * 
+ * Both types in the pair must also have a WyHash specialization. Their hash values are combined using ::wyhash_combine.
+ */
 template<typename T1, typename T2>
 struct WyHash<std::pair<T1, T2>> {
     WyHash<T1> first_hash;
     WyHash<T2> second_hash;
     size_t operator()(const std::pair<T1, T2>& p) const {
-        return wyhash64(first_hash(p.first), second_hash(p.second));
+        return wyhash_combine(first_hash(p.first), second_hash(p.second));
     }
 };
+
+// Specialization for integral types. 
+#define _wyhash_for_integral_type(T) \
+template<> struct WyHash<T> { \
+    size_t operator()(T t) const { \
+        return wyhash_bytes((void*)&t, sizeof(T)); \
+    } \
+};
+
+_wyhash_for_integral_type(bool)
+_wyhash_for_integral_type(char)
+_wyhash_for_integral_type(unsigned char)
+_wyhash_for_integral_type(signed char)
+_wyhash_for_integral_type(short)
+_wyhash_for_integral_type(unsigned short)
+_wyhash_for_integral_type(int)
+_wyhash_for_integral_type(unsigned int)
+_wyhash_for_integral_type(long)
+_wyhash_for_integral_type(unsigned long)
+_wyhash_for_integral_type(long long)
+_wyhash_for_integral_type(unsigned long long)
+
+#undef _wyhash_for_integral_type
 
 }  // namespace cplib

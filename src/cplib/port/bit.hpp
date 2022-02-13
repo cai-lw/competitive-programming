@@ -16,7 +16,7 @@ constexpr bool long_long_or_smaller = std::numeric_limits<T>::digits <= std::num
 template<typename T>
 constexpr bool int_or_smaller = std::numeric_limits<T>::digits <= std::numeric_limits<unsigned int>::digits;
 
-}  // namespace
+}  // namespace impl
 
 template<typename T, std::enable_if_t<impl::is_unsigned_integer_v<T>>* = nullptr>
 constexpr int countl_zero(T x) noexcept {

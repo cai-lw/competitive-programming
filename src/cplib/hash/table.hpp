@@ -92,8 +92,6 @@ public:
         }
     }
 
-    ~HashTable() { delete[] cells; }
-
     /** \brief Returns the number of elements in the hash table. */
     size_type size() const { return occupied; }
 
@@ -107,9 +105,9 @@ public:
     size_type capacity() const { return cap_mask + 1; }
 
     /** \brief Returns pointer to the beginning of the cell array. */
-    impl::HashCell<T>* cell_begin() const { return cells; }
+    impl::HashCell<T>* cell_begin() const { return cells.get(); }
 
-    impl::HashCell<T>* cell_end() const { return cells + capacity(); }
+    impl::HashCell<T>* cell_end() const { return cells.get() + capacity(); }
 
     /**
      * \brief Find an element that compares equal to the given value, or an empty cell if not found.
@@ -123,17 +121,17 @@ public:
         impl::HashCell<T>* phantom = nullptr;
         while (!cells[loc].empty()) {
             if (cells[loc].occupied() && eq(x, cells[loc].value())) {
-                return cells + loc;
+                return cells.get() + loc;
             }
             if (Revive && cells[loc].phantom()) {
-                phantom = cells + loc;
+                phantom = cells.get() + loc;
             }
             loc = (loc + 1) & cap_mask;
         }
         if (Revive && phantom) {
             return phantom;
         } else {
-            return cells + loc;
+            return cells.get() + loc;
         }
     }
 
@@ -198,13 +196,13 @@ public:
     }
 
     /**
-     * \brief Allocates the given capacity, and rehashes all elements.
+     * \brief Allocate the given capacity, and rehash all elements.
      * 
      * \param new_cap The new capacity. Must be a power of two and at least 4.
      */
     void rehash(size_type new_cap) {
         assert(new_cap >= 4 && (new_cap & (new_cap - 1)) == 0);
-        impl::HashCell<T>* old_cells = cells;
+        std::unique_ptr<impl::HashCell<T>[]> old_cells = std::move(cells);
         size_type old_cap = cap_mask + 1;
         _allocate_cells(new_cap);
         nonempty = occupied;
@@ -217,7 +215,6 @@ public:
                 cells[loc] = std::move(old_cells[i]);
             }
         }
-        delete[] old_cells;
     }
 
     /**
@@ -246,15 +243,15 @@ public:
     }
 
 private:
-    impl::HashCell<T>* cells;
+    std::unique_ptr<impl::HashCell<T>[]> cells;
     size_type nonempty, occupied, cap_mask;
     bool disable_shrink;
     Hash hash;
     Eq eq;
 
-    // allocate a new array of cells. Existing cells are NOT deleted.
+    // Allocate a new array of cells, set sentinel and cap_mask.
     void _allocate_cells(size_type cap) {
-        cells = new impl::HashCell<T>[cap + 1];
+        cells = std::make_unique<impl::HashCell<T>[]>(cap + 1);
         cells[cap].inner = impl::HashCell<T>::State::SENTINEL;
         cap_mask = cap - 1;
     }

@@ -2,6 +2,9 @@
 
 #include <limits>
 #include <type_traits>
+#include "cplib/pragmas.h"
+
+// Backport some functions in <bit> in C++20.
 
 namespace cplib::port {
 
@@ -54,7 +57,7 @@ constexpr T bit_floor(T x) noexcept {
 
 template<typename T, std::enable_if_t<impl::is_unsigned_integer_v<T>>* = nullptr>
 constexpr T bit_ceil(T x) noexcept {
-    return x <= T(1) ? T(1) : T(1) << bitwidth(x - 1);
+    return x <= T(1) ? T(1) : T(1) << bit_width(x - 1);
 };
 
 template<typename T, std::enable_if_t<impl::is_unsigned_integer_v<T>>* = nullptr>

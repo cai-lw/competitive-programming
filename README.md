@@ -7,7 +7,10 @@ Use at your own risk for competitive programming purposes. Bug reports and featu
 ## Prerequisites
 * x86_64, G++ and C++17 support are **required**.
   * This library is NOT portable as it is only for use on major online judges.
-    Selecting the wrong C++ standard and/or compiler version on online judges will result in compiler error.
+    Selecting the wrong C++ standard and/or compiler version on online judges will result in compile error.
+  * Due to the widespread use of bit manipulation, all code by default requires architecture that supports
+    [x86 bit manipulation instruction sets up to BMI2](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#BMI2_(Bit_Manipulation_Instruction_Set_2)).
+    This can be disabled by `#define _CPLIB_LEGACY_ARCH_` before `#include`.
 * [CMake](https://cmake.org/) for building and running tests.
 * [Doxygen](https://www.doxygen.nl/) for building documentation.
 

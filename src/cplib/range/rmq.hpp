@@ -13,7 +13,7 @@ namespace impl {
 
 class RangeMinBlock {
 public:
-    using bitmap_t = std::uint_fast32_t;
+    using bitmap_t = uint64_t;
     static constexpr int bitmap_size = std::numeric_limits<bitmap_t>::digits;
 
     template<typename InputIt, typename Comp>

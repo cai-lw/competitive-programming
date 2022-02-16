@@ -135,7 +135,6 @@ struct WyHash<std::pair<T1, T2>> {
     }
 };
 
-// Specialization for integral types. 
 #define _wyhash_for_integral_type(T) \
 template<> struct WyHash<T> { \
     size_t operator()(T t) const { \

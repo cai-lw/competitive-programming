@@ -74,7 +74,7 @@ public:
     static constexpr int block_size = impl::RangeMinBlock::bitmap_size;
     using size_type = std::size_t;
 
-    /** \brief Creates an empty range minumum query object. */
+    /** \brief Creates an empty RangeMinQuery. */
     RangeMinQuery() = default;
 
     /** \copydoc RangeMinQuery::RangeMinQuery(InputIt, InputIt) */

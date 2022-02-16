@@ -10,6 +10,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(run_tests
     test/run_tests.cpp
     test/range/rmq_test.cpp
+    test/range/bit_dict_test.cpp
+    test/range/wavelet_array_test.cpp
     test/hash/hash_table_test.cpp
 )
 

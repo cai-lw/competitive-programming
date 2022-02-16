@@ -103,36 +103,9 @@ public:
      *
      * Undefined behavior if `left >= size()`, `right > size()` or `left >= right`.
      * Note that empty range is not allowed.
-     * 
-     * \see range_min_inclusive
      */
     T range_min(size_type left, size_type right) const {
-        return range_min_inclusive(left, right - 1);
-    }
-
-    /**
-     * \brief Returns the minimum element in the 0-based closed range `[left, right]`.
-     * 
-     * Equivalent to `range_min(left, right + 1)`.
-     * 
-     * \see range_min
-     */
-    T range_min_inclusive(size_type left, size_type right) const {
-        size_type left_block = left / block_size, right_block = right / block_size;
-        if (left_block == right_block) {
-            int block_idx = blocks[left_block].min_idx_inclusive(left % block_size, right % block_size);
-            return data[left_block * block_size + block_idx];
-        }
-        int left_block_idx = blocks[left_block].min_idx_inclusive(left % block_size, block_size - 1);
-        int right_block_idx = blocks[right_block].min_idx_inclusive(0, right % block_size);
-        const T &left_block_min = data[left_block * block_size + left_block_idx];
-        const T &right_block_min = data[right_block * block_size + right_block_idx];
-        const T &lr_block_min = std::min(left_block_min, right_block_min, comp);
-        if (left_block + 1 == right_block) {
-            return lr_block_min;
-        } else {
-            return std::min(lr_block_min, block_table.range_inclusive(left_block + 1, right_block - 1), comp);
-        }
+        return _range_min_inclusive(left, right - 1);
     }
 
 private:
@@ -155,6 +128,24 @@ private:
         for (size_type i = 0; i < num_blocks; i++)
             block_min.push_back(data[i * block_size + blocks[i].min_idx_inclusive(0, block_size - 1)]);
         block_table = SparseTable<T, impl::MinOp<T, Comp>>(move(block_min));
+    }
+
+    T _range_min_inclusive(size_type left, size_type right) const {
+        size_type left_block = left / block_size, right_block = right / block_size;
+        if (left_block == right_block) {
+            int block_idx = blocks[left_block].min_idx_inclusive(left % block_size, right % block_size);
+            return data[left_block * block_size + block_idx];
+        }
+        int left_block_idx = blocks[left_block].min_idx_inclusive(left % block_size, block_size - 1);
+        int right_block_idx = blocks[right_block].min_idx_inclusive(0, right % block_size);
+        const T &left_block_min = data[left_block * block_size + left_block_idx];
+        const T &right_block_min = data[right_block * block_size + right_block_idx];
+        const T &lr_block_min = std::min(left_block_min, right_block_min, comp);
+        if (left_block + 1 == right_block) {
+            return lr_block_min;
+        } else {
+            return std::min(lr_block_min, block_table.range(left_block + 1, right_block), comp);
+        }
     }
 };
 

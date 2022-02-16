@@ -69,17 +69,6 @@ public:
             return op(table[level][left], table[level][left2]);
     }
 
-    /**
-     * @brief Iterated application of operator `Op` on elements in the 0-based closed range `[left, right]`.
-     * 
-     * Equivalent to `range(left, right + 1)`.
-     * 
-     * \see range
-     */
-    T range_inclusive(size_type left, size_type right) const {
-        return range(left, right + 1);
-    }
-
 private:
     std::vector<std::vector<T>> table;
     Op op;

@@ -9,13 +9,9 @@ TEST_CASE("RMQ with small integers", "[rmq]") {
     vector<int> data{3, 1, 4, 1, 5, 9, 2, 6, 5};
     RangeMinQuery<int> rmq(move(data));
     REQUIRE(rmq.size() == 9);
-    REQUIRE(rmq.range_min_inclusive(0, 2) == 1);
     REQUIRE(rmq.range_min(0, 3) == 1);
-    REQUIRE(rmq.range_min_inclusive(4, 8) == 2);
     REQUIRE(rmq.range_min(4, 9) == 2);
-    REQUIRE(rmq.range_min_inclusive(4, 5) == 5);
     REQUIRE(rmq.range_min(4, 6) == 5);
-    REQUIRE(rmq.range_min_inclusive(7, 7) == 6);
     REQUIRE(rmq.range_min(7, 8) == 6);
 }
 

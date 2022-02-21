@@ -81,7 +81,7 @@ public:
     RangeMinQuery(const std::vector<T> &arr) : data(arr) { _build(); }
 
     /** \copydoc RangeMinQuery::RangeMinQuery(InputIt, InputIt) */
-    RangeMinQuery(std::vector<T> &&arr) : data(arr) { _build(); }
+    RangeMinQuery(std::vector<T> &&arr) : data(std::move(arr)) { _build(); }
 
     /**
      * \brief Construct the range minumum query object from the given sequence. 

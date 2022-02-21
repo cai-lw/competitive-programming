@@ -29,7 +29,7 @@ public:
 
     /** \copydoc SparseTable(InputIt, InputIt) */
     SparseTable(std::vector<T> &&data) : op() {
-        table.emplace_back(data);
+        table.emplace_back(std::move(data));
         _build();
     }
 

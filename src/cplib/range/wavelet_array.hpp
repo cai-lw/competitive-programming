@@ -17,7 +17,8 @@ namespace cplib {
  * most operations and should be set as small as possible.
  */
 template <typename T, int M = std::numeric_limits<T>::digits>
-struct WaveletArray {
+class WaveletArray {
+public:
     static_assert(M > 0 && M <= std::numeric_limits<T>::digits);
 
     static constexpr T max_value = M == std::numeric_limits<T>::digits ? std::numeric_limits<T>::max() : (T(1) << M) - 1;

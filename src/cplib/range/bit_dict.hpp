@@ -6,18 +6,9 @@
 #include <vector>
 #include <x86intrin.h>
 #include "cplib/port/bit.hpp"
+#include "cplib/utils.hpp"
 
 namespace cplib {
-
-namespace impl {
-
-// Count the number of 1s in the lowest n bits of x. Manually inserting BZHI intrinsic because GCC won't optimize
-// x & ((1ull << n) - 1) to BZHI until version 10. See: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=93346
-static int popcount_low(uint64_t x, int n) {
-    return port::popcount(_bzhi_u64(x, n));
-}
-
-}  // namespace impl
 
 /**
  * \brief Static bit sequence with rank query in \f$O(1)\f$.

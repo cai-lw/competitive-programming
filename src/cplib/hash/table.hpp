@@ -98,7 +98,8 @@ public:
     /** \brief Returns whether the hash table contains no element. */
     bool empty() const { return occupied == 0; }
 
-    /** \brief Returns the size of the underlying array of cells.
+    /**
+     * \brief Returns the size of the underlying array of cells.
      * 
      * This is always a power of two.
      */

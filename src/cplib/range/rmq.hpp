@@ -101,8 +101,7 @@ public:
      * Returns \f$\min\{a_{left},a_{left+1},\dots,a_{right-1}\}\f$.
      * Time complexity is \f$O(1)\f$ and specifically `Comp` is called at most 3 times.
      *
-     * Undefined behavior if `left >= size()`, `right > size()` or `left >= right`.
-     * Note that empty range is not allowed.
+     * Requires `0 <= left < right <= size()`. Note that empty range is not allowed.
      */
     T range_min(size_type left, size_type right) const {
         return _range_min_inclusive(left, right - 1);

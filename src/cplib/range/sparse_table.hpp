@@ -55,10 +55,7 @@ public:
      * If \f$\circ\f$ denotes `Op`, this returns \f$a_{left} \cdots a_{left+1} \circ \dots \circ a_{right-1}\f$.
      * Time complexity is \f$O(1)\f$ and specfically `Op` is called at most once.
      * 
-     * Undefined behavior if `left >= size()`, `right > size()` or `left >= right`.
-     * Note that empty range is not allowed.
-     * 
-     * \see range_inclusive
+     * Requires `0 <= left < right <= size()`. Note that empty range is not allowed.
      */
     T range(size_type left, size_type right) const {
         int level = port::bit_width(right - left) - 1;

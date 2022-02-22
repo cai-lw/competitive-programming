@@ -78,7 +78,7 @@ public:
     }
 
     /**
-     * \brief Move one level downward in a wavelet tree.
+     * \brief Move one level downwards in a wavelet tree.
      * 
      * This method answers the following question: "If this BitDict represents a level in a wavelet tree, for a boundary
      * located right before `idx`, where is the corresponding boundary at the 0 or 1 child in the next level?". It may

@@ -14,6 +14,7 @@ add_executable(run_tests
     test/range/wavelet_array_test.cpp
     test/hash/hash_table_test.cpp
     test/order/bit_trie_test.cpp
+    test/order/dary_heap_test.cpp
 )
 
 add_subdirectory(Catch2)

@@ -37,10 +37,10 @@ public:
     /** \brief Returns the number of elements. */
     size_type size() const { return size_; }
 
-    /** \brief Returns if the trie is empty. */
+    /** \brief Returns whether the trie is empty. */
     bool empty() const { return size_ == 0; }
 
-    /** \brief Insert an elemnent. Returns if the element was inserted (i.e. doesn't exist before insertion). */
+    /** \brief Insert an elemnent. Returns whether the element is inserted (i.e. doesn't exist before insertion). */
     bool insert(T val) {
         int idx = (val >> Offset) & branch_mask;
         size_type pos = impl::popcount_low(bitmap, idx);
@@ -53,7 +53,7 @@ public:
         return ret;
     }
 
-    /** \brief Delete an elemnent. Returns if the element was deleted (i.e. exists before deletion). */
+    /** \brief Delete an elemnent. Returns whether the element is deleted (i.e. exists before deletion). */
     bool erase(T val) {
         int idx = (val >> Offset) & branch_mask;
         if ((bitmap >> idx) & 1) {
@@ -70,7 +70,7 @@ public:
         }
     }
 
-    /** \brief Returns if the element exists. */
+    /** \brief Returns whether the element exists. */
     bool find(T val) const {
         int idx = (val >> Offset) & branch_mask;
         if ((bitmap >> idx) & 1) {
@@ -95,7 +95,7 @@ public:
         return (T(curr_xor_min) << Offset) | children[pos].xor_min(xor_val);
     }
 
-    /** \brief Returns the smallest element not smaller than the given value, or `std::nullopt` if it doesn't exist. */
+    /** \brief Returns the smallest element no smaller than the given value, or `std::nullopt` if it doesn't exist. */
     std::optional<T> next(T val) const {
         int idx = (val >> Offset) & branch_mask;
         int next_idx = impl::next_set_bit(bitmap, idx);
@@ -119,7 +119,7 @@ public:
         }
     }
 
-    /** \brief Returns the largest element not larger than the given value, or `std::nullopt` if it doesn't exist, */
+    /** \brief Returns the largest element no larger than the given value, or `std::nullopt` if it doesn't exist, */
     std::optional<T> prev(T val) const {
         int idx = (val >> Offset) & branch_mask;
         int prev_idx = impl::prev_set_bit(bitmap, idx + 1);

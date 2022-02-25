@@ -1,17 +1,31 @@
 #include <x86intrin.h>
 #include "cplib/port/bit.hpp"
 
+#pragma GCC push_options
+#ifndef _CPLIB_NO_FORCE_BMI2_
+#pragma GCC target("abm,bmi,bmi2")
+#endif
+
 namespace cplib::impl {
 
-// Count the number of 1s in the lowest n bits of x. Manually inserting BZHI intrinsic because GCC won't optimize
-// x & ((1ull << n) - 1) to BZHI until version 10. See: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=93346
+// Manually inserting BZHI intrinsic because GCC won't optimize x & ((1ull << n) - 1) to BZHI until version 10.
+// See: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=93346
+inline uint64_t low_bits(uint64_t x, int n) {
+#if __GNUC__ < 10 && (defined(__BMI2__) || !defined(_CPLIB_NO_FORCE_BMI2_))
+    return _bzhi_u64(x, n);
+#else
+    return x & ((1ull << n) - 1);
+#endif
+}
+
+// Count the number of 1s in the lowest n bits of x.
 inline int popcount_low(uint64_t x, int n) {
-    return port::popcount(_bzhi_u64(x, n));
+    return port::popcount(low_bits(x, n));
 }
 
 // Returns the largest i such that x[i]=1 and 0<=i<n, or -1 if no such i exists.
 inline int prev_set_bit(uint64_t x, int n) {
-    return port::bit_width(_bzhi_u64(x, n)) - 1;
+    return port::bit_width(low_bits(x, n)) - 1;
 }
 
 // Returns the smallest i such that x[i]=1 and n<=i<64, or 64 if no such i exists.
@@ -44,3 +58,5 @@ inline uint64_t xor_permute(uint64_t x, int xor_val) {
 }
 
 }  // namespace cplib::impl
+
+#pragma GCC pop_options

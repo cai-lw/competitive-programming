@@ -2,7 +2,11 @@
 
 #include <limits>
 #include <type_traits>
-#include "cplib/pragmas.h"
+
+#pragma GCC push_options
+#ifndef _CPLIB_NO_FORCE_BMI2_
+#pragma GCC target("abm,bmi,bmi2")
+#endif
 
 // Backport some functions in <bit> in C++20.
 
@@ -76,3 +80,5 @@ constexpr int popcount(T x) noexcept {
 };
 
 }  // namespace cplib::port
+
+#pragma GCC pop_options

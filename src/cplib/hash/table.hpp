@@ -42,6 +42,7 @@ struct HashCell {
 
 /**
  * \brief Linear probing hash table with `std` non-compliant interface.
+ * \ingroup hash
  * 
  * This hash table aims to be fast for typical competitive programming use cases.
  * Insertion, lookup and deletion takes expected \f$O(1)\f$ time.

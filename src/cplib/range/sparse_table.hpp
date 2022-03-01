@@ -9,6 +9,7 @@ namespace cplib {
 
 /**
  * \brief \f$\langle O(N\log N), O(1) \rangle\f$ sparse table for certain binary operations like `min` and `gcd`.
+ * \ingroup range
  * 
  * \tparam T T Type of elements.
  * \tparam Op A function object that takes two `T`'s and returns a `T`. Must be associative, commutative and idempotent.

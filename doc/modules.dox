@@ -1,0 +1,4 @@
+/** \defgroup hash Hash functions and containers */
+/** \defgroup num Number theory and modular arithmetic */
+/** \defgroup range Range query data structures */
+/** \defgroup order Ordered set data structures */

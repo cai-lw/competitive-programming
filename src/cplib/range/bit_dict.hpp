@@ -12,6 +12,7 @@ namespace cplib {
 
 /**
  * \brief Static bit sequence with rank query in \f$O(1)\f$.
+ * \ingroup range
  * 
  * Together with *select* query, this data structure is known as Fully Indexable Dictionary. Theoretical results
  * using \f$o(N)\f$ space and \f$O(1)\f$ time for both queries are known, but are of little practical interest.
@@ -108,6 +109,7 @@ private:
 
 /**
  * \brief Builder class for BitDict.
+ * \ingroup range
  * 
  * Unless you already have the bits stored contiguously, this should be the preferred way to build a BitDict.
  */

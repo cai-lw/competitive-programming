@@ -5,6 +5,7 @@ namespace cplib {
 
 /**
  * \brief D-ary heap, slightly faster than binary heap due to less random memory access.
+ * \ingroup order
  * 
  * A drop-in replacement for `std::priority_queue`, but is min-heap by default, since min-heap is much more common.
  * 

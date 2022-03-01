@@ -11,8 +11,9 @@ namespace cplib {
 
 /**
  * \brief Bit trie that manages an ordered set of integers, with compile-time fixed height.
+ * \ingroup order
  * 
- * Most operations take \f$O(U/B)\f$ time, where \f$U\f$ is the number of bit in each element, and \f$B\f$ is
+ * Most operations take \f$O(U/B)\f$ time, where \f$U\f$ is the number of bits in each element, and \f$B\f$ is
  * the number of bits per level in the tree. On 64-bit machines \f$B=\log_2 64=6\f$.
  * 
  * The implementation mostly follows https://en.wikipedia.org/wiki/Bitwise_trie_with_bitmap.

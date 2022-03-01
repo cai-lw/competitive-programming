@@ -59,6 +59,7 @@ struct MinOp {
 
 /**
  * \brief Efficient \f$\langle O(N), O(1) \rangle\f$ static range minimum query.
+ * \ingroup range
  * 
  * Divides input sequence into machine word sized blocks. Uses bit operations for in-block queries, and SparseTable for 
  * inter-block queries. Under the transdichotomous model (\f$w\geq\log_2 N\f$ where \f$w=64\f$ is the word size),

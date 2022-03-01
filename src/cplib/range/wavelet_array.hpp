@@ -9,6 +9,7 @@ namespace cplib {
 
 /**
  * \brief Efficient representation of a wavelet tree, supporting various static range queries.
+ * \ingroup range
  * 
  * Each level of the wavelet tree is stored as a BitDict.
  * 

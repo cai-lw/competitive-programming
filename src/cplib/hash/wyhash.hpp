@@ -67,8 +67,9 @@ uint64_t gen_random_seed() {
 }  // namespace impl
 
 /**
- * \relates WyHash
  * \brief Hash function for arbitrary bytes using wyhash.
+ * \ingroup hash
+ * \relates WyHash
  * 
  * Calls wyhash from https://github.com/wangyi-fudan/wyhash/blob/master/wyhash.h, with a random seed initialized
  * from system random source on startup.
@@ -87,8 +88,9 @@ static inline uint64_t wyhash_bytes(const void *key, size_t len) {
 }
 
 /**
- * \relates WyHash
  * \brief Combine two hash values to produce a new hash value.
+ * \ingroup hash
+ * \relates WyHash
  * 
  * Calls wyhash64 from https://github.com/wangyi-fudan/wyhash/blob/master/wyhash.h.
  * 
@@ -103,6 +105,7 @@ static inline uint64_t wyhash_combine(uint64_t a, uint64_t b) {
 
 /**
  * \brief Hash function class like `std::hash` but uses wyhash.
+ * \ingroup hash
  * 
  * Specializations for all [integral types](https://en.cppreference.com/w/cpp/types/is_integral) as well as
  * `std::string` and `std::pair` are provided. For all other types, it must be specialized by the user.

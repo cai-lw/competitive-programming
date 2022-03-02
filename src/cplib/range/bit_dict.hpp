@@ -6,7 +6,7 @@
 #include <vector>
 #include <x86intrin.h>
 #include "cplib/port/bit.hpp"
-#include "cplib/utils.hpp"
+#include "cplib/utils/bit.hpp"
 
 namespace cplib {
 

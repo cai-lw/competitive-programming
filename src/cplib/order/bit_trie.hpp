@@ -5,7 +5,7 @@
 #include <utility>
 #include <variant>
 #include <vector>
-#include "cplib/utils.hpp"
+#include "cplib/utils/bit.hpp"
 
 namespace cplib {
 
@@ -202,10 +202,8 @@ private:
 };
 
 /**
+ * \brief Convenient type alias for using StaticSizedBitTrie.
  * \related StaticSizedBitTrie
- * 
- * Convenient type alias for using StaticSizedBitTrie.
- * 
  * \tparam T The type of the elements. Should be an unsigned integer type.
  * \tparam U Number of bits in each element. That is, all elements are integers in the range of \f$[0,2^U-1]\f$.
  */

@@ -37,8 +37,8 @@ public:
      * 
      * BitDictBuilder is usually prefered over using this constructor. Runs in \f$O(N)\f$ time.
      */
-    BitDict(std::unique_ptr<BitDict::word_t[]> ptr, size_type num_bits)
-        : data(std::move(ptr)), size_(num_bits) { _build(); }
+    BitDict(std::vector<word_t> &&data, size_type num_bits)
+        : data(std::move(data)), size_(num_bits) { _build(); }
 
     /** \brief Returns the number of bits. */
     size_type size() const { return size_; }
@@ -50,7 +50,7 @@ public:
     size_type ones() const { return size_ - zeros_; }
 
     /** \brief Read-only access to a bit. */
-    bool operator[](size_type idx) const {
+    bool get(size_type idx) const {
         std::size_t word_idx = idx / word_size;
         int bits_in_word = idx % word_size;
         return (data[word_idx] >> bits_in_word) & 1;
@@ -82,9 +82,10 @@ public:
      * \brief Move one level downwards in a wavelet tree.
      * 
      * This method answers the following question: "If this BitDict represents a level in a wavelet tree, for a boundary
-     * located right before `idx`, where is the corresponding boundary at the 0 or 1 child in the next level?". It may
-     * not be obvious, but the answer does not depend on the structure of the wavelet tree. As a corollary, an interval
-     * `[left, right)` becomes `[rank_to_child(left, bit), rank_to_child(right, bit))` in the next level.
+     * located right before `idx`, where is the corresponding boundary at the 0 or 1 child in the next level?".
+     * It turns out that the answer does not depend on the structure of the wavelet tree. As a corollary, an interval
+     * `[left, right)` becomes `[rank_to_child(left, bit), rank_to_child(right, bit))` in the next level, where `bit`
+     * means taking the 0-branch or the 1-branch.
      * 
      * \copydetails rank1
      */
@@ -93,7 +94,7 @@ public:
     }
 
 private:
-    std::unique_ptr<BitDict::word_t[]> data;
+    std::vector<word_t> data;
     std::vector<size_type> word_rank;
     size_type size_, zeros_;
 
@@ -125,11 +126,8 @@ public:
      * Note that the size cannot be changed after construction. The BitDict created by build() will have the same
      * number of bits. All bits are initialized to 0.
      */
-    BitDictBuilder(size_type num_bits) : size(num_bits) {
-        std::size_t num_words = (num_bits + BitDict::word_size - 1) / BitDict::word_size;
-        // Arrays allocated with make_unique are value-initialized (i.e. zero-initialized for integers)
-        data = std::make_unique<BitDict::word_t[]>(num_words);
-    }
+    BitDictBuilder(size_type num_bits) :
+        size(num_bits), data((num_bits + BitDict::word_size - 1) / BitDict::word_size) {}
 
     /**
      * \brief Set the given bit to 1 (default) or zero
@@ -146,7 +144,7 @@ public:
     BitDict build() { return BitDict(std::move(data), size); }
 
 private:
-    std::unique_ptr<BitDict::word_t[]> data;
+    std::vector<BitDict::word_t> data;
     size_type size;
 };
 

@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iterator>
+#include <optional>
 #include <variant>
 #include "cplib/hash/wyhash.hpp"
 
@@ -29,7 +30,7 @@ struct HashCell {
 
     void insert(const T& val) { inner = val; }
 
-    void insert(T&& val) { inner = val; }
+    void insert(T&& val) { inner = std::move(val); }
 
     const T& value() const { return std::get<1>(inner); }
 
@@ -65,15 +66,17 @@ class HashTable {
 public:
     using size_type = std::size_t;
     using value_type = T;
-    using iterator_type = impl::HashCell<T>*;
+    using cell_iterator = typename std::vector<impl::HashCell<T>>::iterator;
 
-    /** \brief Constructs an empty hash table.
+    /**
+     * \brief Constructs an empty hash table.
      * 
      * Note that this constructor allocates cells for a capacity of 4 even for an empty hash table.
      */
     HashTable() : nonempty(0), occupied(0), disable_shrink(false) { _allocate_cells(4); }
 
-    /** \brief Constructs a hash table containing elements from a pair of iterators.
+    /**
+     * \brief Constructs a hash table containing elements from a pair of iterators.
      * 
      * If the iterators are random access iterators, the number of elements is known, so sufficient space will be
      * allocated in advance, so that no rehashing happens during construction.
@@ -81,7 +84,7 @@ public:
     template<typename InputIt>
     HashTable(InputIt first, InputIt last) : nonempty(0), occupied(0), disable_shrink(false) {
         size_type cap = 4;
-        if (std::is_same_v<std::iterator_traits<InputIt>::iterator_category, std::random_access_iterator_tag>) {
+        if (std::is_base_of_v<std::random_access_iterator_tag, std::iterator_traits<InputIt>::iterator_category>) {
             auto dist = std::distance(first, last);
             while (dist > (cap >> 1)) {
                 cap <<= 1;
@@ -107,9 +110,15 @@ public:
     size_type capacity() const { return cap_mask + 1; }
 
     /** \brief Returns pointer to the beginning of the cell array. */
-    impl::HashCell<T>* cell_begin() const { return cells.get(); }
+    cell_iterator cell_begin() { return cells.begin(); }
 
-    impl::HashCell<T>* cell_end() const { return cells.get() + capacity(); }
+    /**
+     * \brief Returns pointer to the end of the cell array.
+     * 
+     * This IS safe to dereference and always points to a sentinel cell. Iterator adaptors that skip unoccupied cells
+     * can check for the sentinel cell instead of storing and comparing with the end iterator.
+     */
+    cell_iterator cell_end() { return --cells.end(); }
 
     /**
      * \brief Find an element that compares equal to the given value, or an empty cell if not found.
@@ -118,27 +127,29 @@ public:
      * Used by HashTable::insert to reuse "phantom" cells and reduce rehashing.
      */
     template<bool Revive = false>
-    impl::HashCell<T>* find_cell(const T &x) const {
+    cell_iterator find_cell(const T &x) {
         size_type loc = hash(x) & cap_mask;
-        impl::HashCell<T>* phantom = nullptr;
+        std::optional<cell_iterator> phantom;
         while (!cells[loc].empty()) {
             if (cells[loc].occupied() && eq(x, cells[loc].value())) {
-                return cells.get() + loc;
+                return cells.begin() + loc;
             }
             if (Revive && cells[loc].phantom()) {
-                phantom = cells.get() + loc;
+                phantom = cells.begin() + loc;
             }
             loc = (loc + 1) & cap_mask;
         }
         if (Revive && phantom) {
-            return phantom;
+            return *phantom;
         } else {
-            return cells.get() + loc;
+            return cells.begin() + loc;
         }
     }
 
     /** \brief Returns whether an element that compares equal to the given value is found in the hash table. */
-    bool contains(const T &x) const { return !find_cell(x)->empty(); }
+    bool contains(const T &x) const {
+        return !const_cast<HashTable*>(this)->find_cell(x)->empty();
+    }
 
     /**
      * \brief Insert an element if there is no element already present that compares equal to it.
@@ -148,7 +159,7 @@ public:
      */
     template<bool Replace = false>
     bool insert(const T &x) {
-        impl::HashCell<T> *cell = find_cell<true>(x);
+        cell_iterator cell = find_cell<true>(x);
         bool do_insert = true;
         if (!cell->occupied()) {
             ++occupied;
@@ -168,7 +179,7 @@ public:
     /** \copydoc insert(const T&) */
     template<bool Replace = false>
     bool insert(T&& x) {
-        impl::HashCell<T> *cell = find_cell<true>(x);
+        cell_iterator cell = find_cell<true>(x);
         bool do_insert = true;
         if (!cell->occupied()) {
             ++occupied;
@@ -187,7 +198,7 @@ public:
 
     /** \brief Remove the element that compares equal to the given value if it is present. */
     bool erase(const T &x) {
-        impl::HashCell<T> *cell = find_cell(x);
+        cell_iterator cell = find_cell(x);
         bool do_erase = !cell->empty();
         if (do_erase) {
             cell->erase();
@@ -204,7 +215,7 @@ public:
      */
     void rehash(size_type new_cap) {
         assert(new_cap >= 4 && (new_cap & (new_cap - 1)) == 0);
-        std::unique_ptr<impl::HashCell<T>[]> old_cells = std::move(cells);
+        std::vector<impl::HashCell<T>> old_cells = std::move(cells);
         size_type old_cap = cap_mask + 1;
         _allocate_cells(new_cap);
         nonempty = occupied;
@@ -245,7 +256,7 @@ public:
     }
 
 private:
-    std::unique_ptr<impl::HashCell<T>[]> cells;
+    std::vector<impl::HashCell<T>> cells;
     size_type nonempty, occupied, cap_mask;
     bool disable_shrink;
     Hash hash;
@@ -253,8 +264,8 @@ private:
 
     // Allocate a new array of cells, set sentinel and cap_mask.
     void _allocate_cells(size_type cap) {
-        cells = std::make_unique<impl::HashCell<T>[]>(cap + 1);
-        cells[cap].inner = impl::HashCell<T>::State::SENTINEL;
+        cells = std::vector<impl::HashCell<T>>(cap + 1);
+        cells.back().inner = impl::HashCell<T>::State::SENTINEL;
         cap_mask = cap - 1;
     }
 

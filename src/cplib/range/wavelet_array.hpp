@@ -59,13 +59,17 @@ public:
     }
 
     /** \brief Returns the number of elements. */
-    size_type size() { return bit_dict[0].size(); }
+    size_type size() const { return bit_dict[0].size(); }
 
-    /** \brief Returns the element at the given index. */
-    T get(size_type idx) {
+    /**
+     * \brief Returns the element at the given index.
+     * 
+     * Requires `0 <= idx < size()`. Calls \f$O(M)\f$ BitDict operations.
+     */
+    T get(size_type idx) const {
         T ret = 0;
         for (int lvl = M - 1; lvl >= 0; lvl--) {
-            bool bit = bit_dict[lvl][idx];
+            bool bit = bit_dict[lvl].get(idx);
             ret |= T(bit) << lvl;
             idx = bit_dict[lvl].rank_to_child(idx, bit);
         }
@@ -75,10 +79,9 @@ public:
     /**
      * \brief Returns the 0-indexed n-th smallest element in the range `[left, right)`.
      * 
-     * Requires `0 <= left < right <= size()` and `0 <= n < right - left`.
-     * Calls \f$O(M)\f$ BitDict operations.
+     * Requires `0 <= left < right <= size()` and `0 <= n < right - left`. Calls \f$O(M)\f$ BitDict operations.
      */
-    T range_nth(size_type left, size_type right, size_type n) {
+    T range_nth(size_type left, size_type right, size_type n) const {
         T ret = 0;
         for (int lvl = M - 1; lvl >= 0; lvl--) {
             const BitDict &bd = bit_dict[lvl];
@@ -97,10 +100,9 @@ public:
     /**
      * \brief Returns the number of the given value in the range `[left, right)`.
      * 
-     * Requires `0 <= left < right <= size()` and `0 <= value <= max_value`.
-     * Calls \f$O(M)\f$ BitDict operations.
+     * Requires `0 <= left < right <= size()` and `0 <= value <= max_value`. Calls \f$O(M)\f$ BitDict operations.
      */
-    size_type range_count(size_type left, size_type right, T val) {
+    size_type range_count(size_type left, size_type right, T val) const {
         for (int lvl = M - 1; lvl >= 0; lvl--) {
             bool bit = (val >> lvl) & 1;
             left = bit_dict[lvl].rank_to_child(left, bit);
@@ -115,14 +117,14 @@ public:
      * Requires `0 <= left < right <= size()` and `0 <= low <= high <= max_value`. Note that the value range is
      * **inclusive**, to allow using the maximum value of the type `T`. Calls \f$O(M)\f$ BitDict operations.
      */
-    size_type range_count_between(size_type left, size_type right, T low, T high) {
+    size_type range_count_between(size_type left, size_type right, T low, T high) const {
         return _rangefreq(left, right, low, high, M - 1);
     }
 
 private:
     std::array<BitDict, M> bit_dict;
 
-    size_type _rangefreq(size_type left, size_type right, T low, T high, int lvl) {
+    size_type _rangefreq(size_type left, size_type right, T low, T high, int lvl) const {
         if (left >= right) {
             return 0;
         } else if (high - low == (lvl == M - 1 ? max_value : (T(1) << (lvl + 1)) - 1)) {

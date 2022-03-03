@@ -5,6 +5,7 @@ using namespace cplib;
 
 TEST_CASE("Basic arithmetics with Montgomery modular integer", "[mmint]") {
     using mint = MMInt<998244353>;
+    REQUIRE(mint::mod() == 998244353u);
     REQUIRE(mint().val() == 0u);
     REQUIRE(mint(42).val() == 42u);
     REQUIRE(mint(1000000007).val() == 1755654u);
@@ -66,4 +67,27 @@ TEST_CASE("Identities with Montgomery modular integer", "[mmint]") {
         REQUIRE(msum == msum_direct);
         REQUIRE(msum_direct.val() == sum % mod);
     }
+}
+
+TEST_CASE("Dynamic Montgomery modular integer", "[mmint]") {
+    using ctx = DynamicMontgomeryReductionContext<uint32_t>;
+    using mint = MontgomeryModInt<ctx>;
+    // Start as mod 11
+    auto _guard = ctx::set_mod(11);
+    REQUIRE(mint::mod() == 11u);
+    REQUIRE((mint(6) + mint(7)).val() == 2u);
+    REQUIRE((mint(8) - mint(9)).val() == 10u);
+    // Temporarily set mod to 13 in this scope
+    {
+        auto _guard = ctx::set_mod(13);
+        REQUIRE(mint::mod() == 13u);
+        REQUIRE((mint(6) + mint(7)).val() == 0u);
+        REQUIRE((mint(8) - mint(9)).val() == 12u);
+        REQUIRE((mint(4) * mint(5)).val() == 7u);
+        REQUIRE((mint(2) / mint(3)).val() == 5u);
+    }
+    // Out of scope and back to mod 11
+    REQUIRE(mint::mod() == 11u);
+    REQUIRE((mint(4) * mint(5)).val() == 9u);
+    REQUIRE((mint(2) / mint(3)).val() == 8u);
 }

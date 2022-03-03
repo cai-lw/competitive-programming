@@ -17,6 +17,7 @@ add_executable(run_tests
     test/order/dary_heap_test.cpp
     test/num/gcd_test.cpp
     test/num/mmint_test.cpp
+    test/num/mod_math_test.cpp
 )
 
 add_subdirectory(Catch2)

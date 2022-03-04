@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstdint>
 #include <limits>
 #include <type_traits>
@@ -72,7 +74,7 @@ private:
  * \ingroup num
  * 
  * For static modint, your code should generally use the type alias ::MMInt or ::MMInt64. For dynamic modint, see
- * ::DynamicMontgomeryReductionContext for example.
+ * DynamicMontgomeryReductionContext for example.
  * 
  * Unless converting between modular integers and ordinary integers very frequently (which is rarely the case),
  * Montgomery modular integer is preferred over plain modular integer (such as `atcoder::modint`).
@@ -96,7 +98,7 @@ class MontgomeryModInt {
 public:
     using mint = MontgomeryModInt;
     using int_type = typename Context::int_type;
-    using mr_type = impl::MontgomeryReduction<int_type>;
+    using mr_type = typename Context::mr_type;
     using int_double_t = typename mr_type::int_double_t;
 
     MontgomeryModInt() : _val(0) {}

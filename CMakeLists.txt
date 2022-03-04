@@ -18,6 +18,8 @@ add_executable(run_tests
     test/num/gcd_test.cpp
     test/num/mmint_test.cpp
     test/num/mod_math_test.cpp
+    test/num/prime_test.cpp
+    test/num/factor_test.cpp
 )
 
 add_subdirectory(Catch2)

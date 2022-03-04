@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cassert>
 #include <tuple>
 #include <type_traits>
@@ -15,7 +17,7 @@ namespace cplib {
  * Note that, unlike `std::gcd`, this function only accepts unsigned integers.
  */
 template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
-T gcd(T x, T y) {
+constexpr T gcd(T x, T y) {
     if (x == 0) {
         return y;
     } else if (y == 0) {
@@ -53,7 +55,7 @@ T gcd(T x, T y) {
  * due to extra bound checks needed for finding a unique or small solution.
  */
 template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
-std::tuple<std::make_signed_t<T>, std::make_signed_t<T>, T> bezout(T x, T y) {
+constexpr std::tuple<std::make_signed_t<T>, std::make_signed_t<T>, T> bezout(T x, T y) {
     bool swap = x < y;
     if (swap) {
         std::swap(x, y);
@@ -97,7 +99,7 @@ std::tuple<std::make_signed_t<T>, std::make_signed_t<T>, T> bezout(T x, T y) {
  * Requires \f$\mathrm{GCD}(x,m)=1\f$. Note that \f$m\f$ does not have to be a prime.
  */
 template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
-T mod_inverse(T x, T m) {
+constexpr T mod_inverse(T x, T m) {
     auto [s, t, g] = bezout(x, m);
     assert(g == 1);
     return s < 0 ? T(s) + m : s;

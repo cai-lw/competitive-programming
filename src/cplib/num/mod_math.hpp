@@ -1,25 +1,15 @@
+#pragma once
+
 #include <optional>
 #include "cplib/num/mmint.hpp"
+#include "cplib/num/pow.hpp"
 
 namespace cplib {
-
-template<typename R>
-R pow(R base, uint64_t exp) {
-    R res(1);
-    while (exp) {
-        if (exp & 1) {
-            res *= base;
-        }
-        base *= base;
-        exp >>= 1;
-    }
-    return res;
-}
 
 /**
  * \brief Square root modulo a prime number.
  * \ingroup num
- * 
+ *
  * Returns a \f$x\f$ such that \f$x^2\equiv n \pmod{p}\f$, or `std::nullopt` if it doesn't exist. \f$-x\f$ is always
  * also a solution and there is no other solution.
  * 
@@ -41,8 +31,7 @@ std::optional<Fp> sqrt_mod_prime(Fp n){
     else if (p % 4 == 3) {
         return pow(n, (p + 1) / 4);
     }
-    // 
-    Fp a, w2;
+    Fp a(0), w2;
     do {
         a += fp1;
         w2 = a * a - n;
@@ -68,7 +57,7 @@ std::optional<Fp> sqrt_mod_prime(Fp n){
 }
 
 /**
- * \copybrief sqrt_mod_prime(Fp)
+ * \brief Square root modulo a prime number.
  * \ingroup num
  * 
  * Returns a \f$x\f$ such that \f$x^2\equiv n \pmod{p}\f$ and \f$0\leq x<p\f$, or `std::nullopt` if it doesn't exist.

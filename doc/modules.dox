@@ -2,3 +2,4 @@
 /** \defgroup num Number theory and modular arithmetic */
 /** \defgroup range Range query data structures */
 /** \defgroup order Ordered set data structures */
+/** \defgroup conv FFT and convolutions */

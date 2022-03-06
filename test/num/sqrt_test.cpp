@@ -1,9 +1,9 @@
 #include "catch2/catch.hpp"
-#include "cplib/num/mod_math.hpp"
+#include "cplib/num/sqrt.hpp"
 using namespace std;
 using namespace cplib;
 
-TEST_CASE("Modular sqaure root", "[mod_math]") {
+TEST_CASE("Modular sqaure root", "[sqrt]") {
     REQUIRE(*sqrt_mod_prime(0u, 2u) == 0u);
     REQUIRE(*sqrt_mod_prime(1u, 2u) == 1u);
     REQUIRE(!sqrt_mod_prime(3u, 7u));

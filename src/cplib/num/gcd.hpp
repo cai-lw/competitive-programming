@@ -26,7 +26,6 @@ constexpr T gcd(T x, T y) {
     int kx = port::countr_zero(x);
     int ky = port::countr_zero(y);
     x >>= kx;
-    y >>= ky;
     while (y != 0) {
         y >>= port::countr_zero(y);
         if (x > y) {

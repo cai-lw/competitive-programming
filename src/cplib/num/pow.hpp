@@ -2,9 +2,9 @@
 
 namespace cplib {
 
-template<typename R>
-constexpr R pow(R base, unsigned long long exp) {
-    R res(1);
+template<typename T>
+constexpr T pow(T base, unsigned long long exp) {
+    T res(1);
     while (exp) {
         if (exp & 1) {
             res *= base;

@@ -51,13 +51,13 @@ void conv_fft_inplace2(std::vector<T> &a, std::vector<T> &b) {
  * array is empty, in which case the output is empty as well. The result length must be no larger than the largest
  * \f$2^n\f$ for which `T` has \f$2^n\f$-th root of unity.
  * 
- * `b` is modified in an unspecified way. Use convolution_inplace() if `b` needs to be preserved for later use, or
- * convolution() if both `a` and `b` need to be preserved.
+ * `b` is modified in an unspecified way. Use convolve_inplace() if `b` needs to be preserved for later use, or
+ * convolve() if both `a` and `b` need to be preserved.
  * 
  * \tparam T See fft_inplace() for requirements for `T`.
  */
 template<typename T>
-void convolution_inplace2(std::vector<T> &a, std::vector<T> &b) {
+void convolve_inplace2(std::vector<T> &a, std::vector<T> &b) {
     if (a.empty() || b.empty()) {
         a.clear();
     } else if (std::min(a.size(), b.size()) <= 32) {
@@ -73,23 +73,23 @@ void convolution_inplace2(std::vector<T> &a, std::vector<T> &b) {
  * 
  * The convolution of `a` and `b` is stored in `a`.
  * 
- * \see convolution_inplace2() for details
+ * \see convolve_inplace2() for details
  */
 template<typename T>
-void convolution_inplace(std::vector<T> &a, const std::vector<T> &b) {
+void convolve_inplace(std::vector<T> &a, const std::vector<T> &b) {
     auto b_copy = b;
-    convolution_inplace2(a, b_copy);
+    convolve_inplace2(a, b_copy);
 }
 
 /**
  * \brief Returns the convolution of two arrays.
  * \ingroup conv
- * \see convolution_inplace2() for details.
+ * \see convolve_inplace2() for details.
  */
 template<typename T>
-std::vector<T> convolution(const std::vector<T> &a, const std::vector<T> &b) {
+std::vector<T> convolve(const std::vector<T> &a, const std::vector<T> &b) {
     auto a_copy = a;
-    convolution_inplace(a_copy, b);
+    convolve_inplace(a_copy, b);
     return a_copy;
 }
 

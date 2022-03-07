@@ -21,6 +21,7 @@ add_executable(run_tests
     test/num/prime_test.cpp
     test/num/factor_test.cpp
     test/conv/conv_test.cpp
+    test/conv/multivar_test.cpp
 )
 
 add_subdirectory(Catch2)

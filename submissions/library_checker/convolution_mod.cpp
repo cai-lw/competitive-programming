@@ -25,7 +25,7 @@ int main() {
         cin >> x;
         b.emplace_back(x);
     }
-    convolution_inplace2(a, b);
+    convolve_inplace2(a, b);
     for (size_t i = 0; i < n + m - 1; i++) {
         cout << a[i].val() << (i == n + m - 2 ? '\n' : ' ');
     }

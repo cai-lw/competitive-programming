@@ -70,16 +70,16 @@ struct radix2_fft_root<MMInt<998244353>> {
 /**
  * \brief Specialization of radix2_fft_root for a large FFT-friendly finite prime field.
  * 
- * Since \f$p=4179340454199820289=29\cdot 2^{57}+1\f$, \f$2^n\f$-th root of unity exists for \f$0\leq n \leq 57\f$.
+ * Since \f$p=4512606826625236993=501\cdot 2^{53}+1\f$, \f$2^n\f$-th root of unity exists for \f$0\leq n \leq 53\f$.
  * 
  * This is useful for convolution over \f$\mathbb{Z}\f$ where all terms in the result are bounded by a range smaller
- * than \f$p\approx 4\times 10^{18}\f$, so the result modulo \f$p\f$ uniquely determines the result in \f$\mathbb{Z}\f$.
+ * than \f$p\approx 4.5\times 10^{18}\f$, so the value modulo \f$p\f$ uniquely determines the value in \f$\mathbb{Z}\f$.
  */
 template<>
-struct radix2_fft_root<MMInt64<4179340454199820289>> {
-    using mint = MMInt64<4179340454199820289>;
+struct radix2_fft_root<MMInt64<4512606826625236993>> {
+    using mint = MMInt64<4512606826625236993>;
     static mint get(int n) {
-        return pow(mint(3), 29ull << (57 - n));
+        return pow(mint(7), 501ull << (53 - n));
     }
 };
 

@@ -7,7 +7,7 @@
 namespace cplib {
 
 /**
- * \brief Square root modulo a prime number.
+ * \brief Square root in a fini
  * \ingroup num
  *
  * Returns a \f$x\f$ such that \f$x^2\equiv n \pmod{p}\f$, or `std::nullopt` if it doesn't exist. \f$-x\f$ is always
@@ -26,9 +26,9 @@ std::optional<Fp> sqrt_mod_prime(Fp n){
     auto p = Fp::mod();
     if (n == fp0 || p == 2) {
         return n;
-    } else if (pow(n, (p - 1) / 2) != fp1)
+    } else if (pow(n, (p - 1) / 2) != fp1) {
         return std::nullopt;
-    else if (p % 4 == 3) {
+    } else if (p % 4 == 3) {
         return pow(n, (p + 1) / 4);
     }
     Fp a(0), w2;

@@ -44,12 +44,12 @@ public:
         return r;
     }
 
-    // Shrink value into range [0,2N)
+    // Shrink value from [0,4N) into [0,2N)
     constexpr int_type shrink(int_type x) const {
         return x >= _mod * 2 ? x - _mod * 2 : x;
     }
 
-    // Shrink value into range [0,N)
+    // Shrink value from [0,2N) into [0,N)
     constexpr int_type strict_shrink(int_type x) const {
         return x >= _mod ? x - _mod : x;
     }
@@ -127,6 +127,11 @@ public:
         return mr().strict_shrink(mr().reduce(_val));
     }
 
+    /** \brief Returns a hash code that is the same for the same residue class modulo the modulus. */
+    int_type residue() const {
+        return mr().strict_shrink(_val);
+    }
+
     /** \brief Returns the modulus. */
     static constexpr int_type mod() { return mr().mod(); }
 
@@ -141,7 +146,7 @@ public:
         return ret;
     }
 
-    mint operator+() {
+    mint operator+() const {
         return *this;
     }
 
@@ -167,7 +172,7 @@ public:
         return ret;
     }
 
-    mint operator-() {
+    mint operator-() const {
         return from_raw(_val == 0 ? 0 : mr().mod() * 2 - _val);
     }
 
@@ -263,7 +268,7 @@ private:
  * \brief Runtime mutable modulus for Montgomery reduction.
  * \ingroup num
  * 
- * Maintains a stack of moduli. Push stack when set_mod is called, and pop stack when the ModGuard object goes
+ * Maintains a stack of moduli. Push stack when set_mod is called, and pop stack when the Guard object goes
  * out of scope. This allows recursively calling functions that use different moduli. However at any given moment
  * you can only use one modulus.
  * 
@@ -293,31 +298,31 @@ public:
     using int_type = UInt;
     using mr_type = impl::MontgomeryReduction<int_type>;
 
-    struct ModGuard {
-        ModGuard(const ModGuard&) = delete;
-        ModGuard(ModGuard&&) = delete;
-        ModGuard& operator=(const ModGuard&) = delete;
-        ModGuard& operator=(ModGuard&&) = delete;
-        ~ModGuard() {
+    struct Guard {
+        Guard(const Guard&) = delete;
+        Guard(Guard&&) = delete;
+        Guard& operator=(const Guard&) = delete;
+        Guard& operator=(Guard&&) = delete;
+        ~Guard() {
             _reduction_env.pop_back();
         }
     private:
         friend DynamicMontgomeryReductionContext;
-        ModGuard() {};
+        Guard() {};
     };
 
     /**
      * \brief Set the modulus.
      * 
-     * The returned ModGuard object must stay alive when computing under this modulus.
+     * The returned Guard object must stay alive when computing under this modulus.
      * 
      * \param mod Must be odd and no larger than than 1/4 of `UInt`'s maximum value.
      */
     [[nodiscard]]
-    static ModGuard set_mod(int_type mod) {
+    static Guard set_mod(int_type mod) {
         assert(mod % 2 == 1 && mod <= std::numeric_limits<int_type>::max() / 4);
         _reduction_env.emplace_back(mod);
-        return ModGuard();
+        return Guard();
     }
 
     static constexpr const mr_type& montgomery_reduction() {

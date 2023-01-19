@@ -16,7 +16,7 @@ inline uint64_t low_bits(uint64_t x, int n) {
 #if __GNUC__ < 10 && (defined(__BMI2__) || !defined(_CPLIB_NO_FORCE_BMI2_))
     return _bzhi_u64(x, n);
 #else
-    return x & ((1ull << n) - 1);
+    return n >= 64 ? x : x & ((1ull << n) - 1);
 #endif
 }
 

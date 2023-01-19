@@ -36,7 +36,7 @@ std::vector<T> twiddling_factors(const std::vector<T> &roots) {
 /**
  * \brief \f$2^n\f$-th root of unity for radix-2 FFT.
  * \ingroup conv
- * \see radix2_fft_root<MMInt<998244353>>, radix2_fft_root<MMInt64<4179340454199820289>>,
+ * \see radix2_fft_root<MMInt<998244353>>, radix2_fft_root<MMInt64<4512606826625236993>>,
  * radix2_fft_root<std::complex<Float>>
  * 
  * Specialization of this class must provide a method `static T get(int n)` that returns the \f$2^n\f$-th root of unity.

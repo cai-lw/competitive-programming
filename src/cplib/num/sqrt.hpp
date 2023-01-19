@@ -7,7 +7,7 @@
 namespace cplib {
 
 /**
- * \brief Square root in a fini
+ * \brief Square root modulo a prime number.
  * \ingroup num
  *
  * Returns a \f$x\f$ such that \f$x^2\equiv n \pmod{p}\f$, or `std::nullopt` if it doesn't exist. \f$-x\f$ is always

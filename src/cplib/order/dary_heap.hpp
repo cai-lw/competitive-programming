@@ -24,6 +24,8 @@ struct DaryHeap {
 public:
     using size_type = std::size_t;
 
+    DaryHeap() : arr(), comp() {}
+
     /** \brief Returns the number of elements. */
     size_type size() const { return arr.size(); }
 

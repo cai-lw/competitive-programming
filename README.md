@@ -53,4 +53,5 @@ oj-verify run
 ## Documentation
 View documentation at https://cai-lw.github.io/competitive-programming/.
 
-Run `scripts/build_and_publish_docs.sh` to build documentation and publish it to GitHub Pages.
+Run `scripts/build_and_publish_docs.sh` to build documentation and publish it to GitHub Pages, or run `doxygen` to
+generate it locally to `docs/`.

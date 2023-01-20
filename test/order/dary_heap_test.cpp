@@ -35,7 +35,7 @@ TEST_CASE("Small heap with small integers", "[dary_heap]") {
     REQUIRE(heap.empty());
 }
 
-TEST_CASE("Heap with many integers inserted in random order", "[bit_trie]") {
+TEST_CASE("Heap with many integers inserted in random order", "[dary_heap]") {
     const int N = 1000;
     vector<int> a(N);
     iota(a.begin(), a.end(), 0);

@@ -15,6 +15,7 @@ add_executable(run_tests
     test/hash/hash_table_test.cpp
     test/order/bit_trie_test.cpp
     test/order/dary_heap_test.cpp
+    test/order/pairing_heap_test.cpp
     test/num/gcd_test.cpp
     test/num/mmint_test.cpp
     test/num/sqrt_test.cpp

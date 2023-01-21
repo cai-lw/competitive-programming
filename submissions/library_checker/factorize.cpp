@@ -6,7 +6,7 @@ using namespace std;
 using namespace cplib;
 
 int main() {
-    gitios::sync_with_stdio(false);
+    ios::sync_with_stdio(false);
     cin.tie(nullptr);
     int q;
     cin >> q;

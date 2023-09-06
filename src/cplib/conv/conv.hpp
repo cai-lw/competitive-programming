@@ -8,21 +8,30 @@ namespace cplib {
 
 namespace impl {
 
+inline bool conv_naive_is_efficient(std::size_t n, std::size_t m) {
+    return std::min(n, m) <= 32;
+}
+
 template<typename T>
-void conv_naive_inplace2(std::vector<T> &a, std::vector<T> &b) {
+void conv_naive_inplace(std::vector<T> &a, const std::vector<T> &b) {
+    if (a.empty() || b.empty()) {
+        a.clear();
+        return;
+    }
     using usize = std::size_t;
-    usize out_size = a.size() + b.size() - 1;
-    a.resize(out_size, T(0));
-    usize k = out_size;
-    do {
-        --k;
-        usize i_begin = k >= b.size() ? k + 1 - b.size() : 0;
-        usize i_end = std::min(k, a.size());
-        a[k] *= b[0];
-        for (usize i = i_begin; i < i_end; ++i) {
-            a[k] += a[i] * b[k - i];
+    usize a_deg = a.size() - 1, b_deg = b.size() - 1;
+    a.resize(a_deg + b_deg + 1, T(0));
+    for (usize i = a_deg + b_deg; i > 0; i--) {
+        if (i <= a_deg) {
+            a[i] *= b[0];
         }
-    } while(k != 0);
+        usize j_low = i <= a_deg ? 1 : i - a_deg;
+        usize j_high = i <= b_deg ? i : b_deg;
+        for(usize j = j_low; j <= j_high; j++) {
+            a[i] += a[i - j] * b[j];
+        }
+    }
+    a[0] *= b[0];
 }
 
 template<typename T>
@@ -58,10 +67,8 @@ void conv_fft_inplace2(std::vector<T> &a, std::vector<T> &b) {
  */
 template<typename T>
 void convolve_inplace2(std::vector<T> &a, std::vector<T> &b) {
-    if (a.empty() || b.empty()) {
-        a.clear();
-    } else if (std::min(a.size(), b.size()) <= 32) {
-        impl::conv_naive_inplace2(a, b);
+    if (impl::conv_naive_is_efficient(a.size(), b.size())) {
+        impl::conv_naive_inplace(a, b);
     } else {
         impl::conv_fft_inplace2(a, b);
     }
@@ -77,8 +84,12 @@ void convolve_inplace2(std::vector<T> &a, std::vector<T> &b) {
  */
 template<typename T>
 void convolve_inplace(std::vector<T> &a, const std::vector<T> &b) {
-    auto b_copy = b;
-    convolve_inplace2(a, b_copy);
+    if (impl::conv_naive_is_efficient(a.size(), b.size())) {
+        impl::conv_naive_inplace(a, b);
+    } else {
+        auto b_copy = b;
+        impl::conv_fft_inplace2(a, b_copy);
+    }
 }
 
 /**

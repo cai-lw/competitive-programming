@@ -25,7 +25,7 @@ int main() {
         cin >> x;
         b.emplace_back(x);
     }
-    a = convolve_any_modint(a, b);
+    convolve_any_modint_inplace(a, b);
     for (size_t i = 0; i < n + m - 1; i++) {
         cout << a[i].val() << (i == n + m - 2 ? '\n' : ' ');
     }

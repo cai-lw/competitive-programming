@@ -50,7 +50,7 @@ struct radix2_fft_root<MMInt64<4242390848983007233>> {
 };
 
 /**
- * \brief Convolution with arbitrary modulus.
+ * \brief In-place convolution with arbitrary modulus.
  * \ingroup conv
  * 
  * Using two 64-bit FFT-friendly prime moduli, it effectively computes convolution modulo a large number,
@@ -67,14 +67,30 @@ struct radix2_fft_root<MMInt64<4242390848983007233>> {
  * \tparam ModInt A modint type. The only requirements are `operator+`, `opeartor*`, and conversion from `uint64_t`.
  */
 template<typename ModInt>
-std::vector<ModInt> convolve_any_modint(const std::vector<ModInt> &a, const std::vector<ModInt> &b) {
+void convolve_any_modint_inplace(std::vector<ModInt> &a, const std::vector<ModInt> &b) {
+    if (impl::conv_naive_is_efficient(a.size(), b.size())) {
+        impl::conv_naive_inplace(a, b);
+        return;
+    }
     using mint1 = MMInt64<4512606826625236993>;
     using mint2 = MMInt64<4242390848983007233>;
     using u128 = unsigned __int128;
     u128 max_prod = u128(ModInt::mod() - 1) * (ModInt::mod() - 1);
     u128 limit = u128(mint1::mod()) * mint2::mod() - 1;
-    assert(a.empty() || b.empty() || max_prod <= limit / std::min(a.size(), b.size()));
-    return impl::convolve_with_two_modints<ModInt, ModInt, mint1, mint2>(a, b);
-} 
+    assert(max_prod <= limit / std::min(a.size(), b.size()));
+    a = impl::convolve_with_two_modints<ModInt, ModInt, mint1, mint2>(a, b);
+}
+
+/**
+ * \brief Returns the convolution of two arrays modulo an arbitrary integer.
+ * \ingroup conv
+ * \see convolve_any_modint_inplace() for details.
+ */
+template<typename ModInt>
+std::vector<ModInt> convolve_any_modint(const std::vector<ModInt> &a, const std::vector<ModInt> &b) {
+    std::vector<ModInt> a_copy = a;
+    convolve_any_modint_inplace(a_copy, b);
+    return a_copy;
+}
 
 }  // namespace cplib

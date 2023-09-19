@@ -31,29 +31,42 @@ public:
     /** \brief Creates a WaveletArray by consuming an array of elements. */
     WaveletArray(std::vector<T>&& data) {
         std::vector<T> temp = std::move(data);
-        *this = build_and_sort(temp.begin(), temp.end());
+        *this = build_and_sort(temp.data(), temp.size());
     }
 
     /**
-     * \brief Builds a WaveletArray from a range of elements, sorting them in place as a side effect.
+     * \brief Builds a WaveletArray from a mutable buffer, sorting it in place as a side effect.
      * 
-     * This is the most generic interface for constructing a WaveletArray. The side effect is rarely desirable and
-     * the original data is usually discarded afterwards. Runs in \f$O(NM)\f$ time.
-     * 
-     * \tparam BidirIt A bidirectional iterator type.
+     * The side effect is rarely desirable and the original data is usually discarded afterwards.
+     * Runs in \f$O(NM)\f$ time.
      */
-    template <typename BidirIt>
-    static WaveletArray build_and_sort(BidirIt first, BidirIt last) {
+    static WaveletArray build_and_sort(T* data, size_type size) {
         WaveletArray<T, M> wa;
-        std::size_t size = std::distance(first, last);
+        std::unique_ptr<T[]> temp(new T[size]);
         for (int lvl = M - 1; lvl >= 0; lvl--) {
-            BitDictBuilder builder(size);
-            BitDict::size_type i = 0;
-            for (auto it = first; it != last; ++it) {
-                builder.set(i++, (*it >> lvl) & 1);
-            }
-            wa.bit_dict[lvl] = builder.build();
-            stable_partition(first, last, [=](T x) { return !((x >> lvl) & 1); });
+            BitDict& dict = wa.bit_dict[lvl];
+            dict = BitDict(size);
+            // Set the dict with the lvl-th bit of each element, then stably sort them by this bit.
+            T* in = data;
+            T* out0 = temp.get();
+            T* out1 = temp.get() + (size - 1);
+            const auto bit_generator = [&]() {
+                bool bit = (*in >> lvl) & 1;
+                if (bit) {
+                    *out1 = *in;
+                    out1--;
+                } else {
+                    *out0 = *in;
+                    out0++;
+                }
+                in++;
+                return bit;
+            };
+            dict.fill_with_bit_generator(bit_generator);
+            dict.build();
+            // temp has all "0" elements in original order, followed by all "1" elements in reversed original order.
+            T* data_mid = std::copy(temp.get(), out0, data);
+            std::reverse_copy(out0, temp.get() + size, data_mid);
         }
         return wa;
     }

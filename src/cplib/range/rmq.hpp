@@ -118,16 +118,19 @@ private:
         size_type num_blocks = (data.size() + block_size - 1) / block_size;
         Comp comp;
         blocks.reserve(num_blocks);
-        for (size_type i = 0; i < num_blocks; i++) {
-            auto first = data.begin() + i * block_size;
-            auto last = (i + 1) * block_size >= data.size() ? data.end() : first + block_size;
-            blocks.emplace_back(first, last, comp);
+        for (size_type i = 0; i + 1 < num_blocks; i++) {
+            auto begin = data.begin() + i * block_size;
+            blocks.emplace_back(begin, begin + block_size, comp);
         }
+        blocks.emplace_back(data.begin() + (num_blocks - 1) * block_size, data.end(), comp);
         std::vector<T> block_min;
         block_min.reserve(num_blocks);
-        for (size_type i = 0; i < num_blocks; i++)
+        for (size_type i = 0; i + 1 < num_blocks; i++) {
             block_min.push_back(data[i * block_size + blocks[i].min_idx_inclusive(0, block_size - 1)]);
-        block_table = SparseTable<T, impl::MinOp<T, Comp>>(move(block_min));
+        }
+        block_min.push_back(data[(num_blocks - 1) * block_size
+            + blocks.back().min_idx_inclusive(0, (data.size() + block_size - 1) % block_size)]);
+        block_table = SparseTable<T, impl::MinOp<T, Comp>>(std::move(block_min));
     }
 
     T _range_min_inclusive(size_type left, size_type right) const {

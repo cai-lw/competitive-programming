@@ -4,11 +4,11 @@ using namespace std;
 using namespace cplib;
 
 TEST_CASE("Bit dict with small array", "[bit_dict]") {
-    BitDictBuilder builder(20);
+    BitDict bd(20);
     for (int p : {2, 3, 5, 7, 11, 13, 17, 19}) {
-        builder.set(p);
+        bd.set(p);
     }
-    BitDict bd = builder.build();
+    bd.build();
     REQUIRE(bd.size() == 20);
     REQUIRE(bd.ones() == 8);
     REQUIRE(bd.zeros() == 12);
@@ -27,11 +27,11 @@ TEST_CASE("Bit dict with small array", "[bit_dict]") {
 }
 
 TEST_CASE("Bit dict with large array", "[bit_dict]") {
-    BitDictBuilder builder(12345);
+    BitDict bd(12345);
     for (int i = 0; i < 12345; i += 10) {
-        builder.set(i);
+        bd.set(i);
     }
-    BitDict bd = builder.build();
+    bd.build();
     REQUIRE(bd.size() == 12345);
     REQUIRE(bd.ones() == 1235);
     REQUIRE(bd.zeros() == 11110);
@@ -50,11 +50,11 @@ TEST_CASE("Bit dict with large array", "[bit_dict]") {
 }
 
 TEST_CASE("Bit dict with power of 2 array", "[bit_dict]") {
-    BitDictBuilder builder(65536);
+    BitDict bd(65536);
     for (int i = 1; i <= 65536; i *= 2) {
-        builder.set(i - 1);
+        bd.set(i - 1);
     }
-    BitDict bd = builder.build();
+    bd.build();
     REQUIRE(bd.size() == 65536);
     REQUIRE(bd.ones() == 17);
     REQUIRE(bd.zeros() == 65519);
@@ -70,4 +70,29 @@ TEST_CASE("Bit dict with power of 2 array", "[bit_dict]") {
     REQUIRE(bd.rank0(65536) == 65519);
     REQUIRE(bd.rank_to_child(10000, false) == 9986);
     REQUIRE(bd.rank_to_child(10000, true) == 65533);
+}
+
+TEST_CASE("Bit dict with mostly 1's", "[bit_dict]") {
+    BitDict bd(12345);
+    for (int i = 0; i < 12345; i++) {
+        if (i % 100 != 99) {
+            bd.set(i);
+        }
+    }
+    bd.build();
+    REQUIRE(bd.size() == 12345);
+    REQUIRE(bd.zeros() == 123);
+    REQUIRE(bd.ones() == 12222);
+    REQUIRE(bd.get(1234) == true);
+    REQUIRE(bd.get(9999) == false);
+    REQUIRE(bd.rank1(0) == 0);
+    REQUIRE(bd.rank1(999) == 990);
+    REQUIRE(bd.rank1(10000) == 9900);
+    REQUIRE(bd.rank1(12345) == 12222);
+    REQUIRE(bd.rank0(0) == 0);
+    REQUIRE(bd.rank0(999) == 9);
+    REQUIRE(bd.rank0(10000) == 100);
+    REQUIRE(bd.rank0(12345) == 123);
+    REQUIRE(bd.rank_to_child(10000, false) == 100);
+    REQUIRE(bd.rank_to_child(10000, true) == 10023);
 }

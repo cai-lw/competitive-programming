@@ -21,7 +21,7 @@ namespace cplib {
  * \tparam Fp Finite field \f$\mathbb{F}_p\f$ where \f$p\f$ is prime.
  */
 template<typename Fp>
-std::optional<Fp> sqrt_mod_prime(Fp n){
+std::optional<Fp> sqrt_mod_fp(Fp n){
     const Fp fp0(0), fp1(1);
     auto p = Fp::mod();
     if (n == fp0 || p == 2) {
@@ -71,14 +71,10 @@ std::optional<T> sqrt_mod_prime(T n, T p) {
         // Cannot use MontgomeryModInt since 2 is even.
         return n % 2;
     }
-    using mint = DynamicMMInt<T>;
-    auto _guard = mint::set_mod_guard(p);
-    std::optional<mint> ret = sqrt_mod_prime(mint(n));
-    if (ret) {
-        return ret->val();
-    } else {
-        return std::nullopt;
-    }
+    return visit_by_modulus([](const auto& n_mod_p) {
+        auto ret = sqrt_mod_fp(n_mod_p);
+        return ret ? ret->val() : std::optional<T>();
+    }, p, n);
 }
 
 }  // namespace cplib

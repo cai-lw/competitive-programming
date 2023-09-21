@@ -16,8 +16,8 @@ TEST_CASE("Modular sqaure root", "[sqrt]") {
     REQUIRE((sqrt2m998244353 == 116195171u || sqrt2m998244353 == 998244353u - 116195171u));
 
     using mint = MMInt<13>;
-    REQUIRE(sqrt_mod_prime(mint(0))->val() == 0u);
-    REQUIRE(!sqrt_mod_prime(mint(2)));
-    uint32_t sqrt3m13 = sqrt_mod_prime(mint(3))->val();
+    REQUIRE(sqrt_mod_fp(mint(0))->val() == 0u);
+    REQUIRE(!sqrt_mod_fp(mint(2)));
+    uint32_t sqrt3m13 = sqrt_mod_fp(mint(3))->val();
     REQUIRE((sqrt3m13 == 4u || sqrt3m13 == 9u));
 }

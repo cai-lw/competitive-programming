@@ -75,8 +75,10 @@ public:
     }
 
     // (-a)%N. Result <2N if input <2N.
-    constexpr int_type negate(int_type x) const {
-        return x == 0 ? 0 : this->mod_ * 2 - x;
+    constexpr int_type sub(int_type a, int_type b) const {
+        int_type r = a - b;
+        // r > a if and only if a - b underflows.
+        return r > a ? r + this->mod_ * 2 : r;
     }
 
     // Shrink value from [0,2N) into [0,N)
@@ -110,14 +112,16 @@ public:
 
     // (a+b)%N
     constexpr int_type add(int_type a, int_type b) const {
-        int_type r = a + b;
-        // r < a (and r < b) happens if and only if a + b overflows.
-        return r < a || r >= this->mod_ ? r - this->mod_ : r;
+        int_type r = a - (this->mod_ - b);
+        // (this->mod_ - b) is always positive. r < a if and only if a - (this->mod_ - b) underflows.
+        return r > a ? r + this->mod_ : r;
     }
 
-    // (-a)%N
-    constexpr int_type negate(int_type x) const {
-        return x == 0 ? 0 : this->mod_ - x;
+    // (a-b)%N
+    constexpr int_type sub(int_type a, int_type b) const {
+        int_type r = a - b;
+        // r > a if and only if a - b underflows.
+        return r > a ? r + this->mod_ : r;
     }
 
     // No-op
@@ -177,7 +181,7 @@ private:
  * \ingroup num
  * 
  * Your code should generally use the type alias ::MMInt or ::MMInt64 for compile-time static modulus, or one of
- * ::DynamicMMInt30, ::DynamicMMInt32, ::DynamicMMInt62, ::DynamicMMInt64 and ::DynamicMMInt for dynamic modulus.
+ * ::DynamicMMInt30, ::DynamicMMInt32, ::DynamicMMInt62, ::DynamicMMInt64 for runtime dynamic modulus.
  * 
  * Unless converting between modular integers and ordinary integers very frequently (which is rarely the case),
  * Montgomery modular integer is preferred over plain modular integer (such as `atcoder::modint`).
@@ -291,7 +295,7 @@ public:
     }
 
     mint& operator--() {
-        val_ = mr().shrink(val_ + mr().mod() - mr().mbase());
+        val_ = mr().sub(val_, mr().mbase());
         return *this;
     }
 
@@ -302,15 +306,15 @@ public:
     }
 
     mint operator-() const {
-        return from_raw(mr().negate(val_));
+        return from_raw(mr().sub(0, val_));
     }
 
     mint operator-(const mint &rhs) const {
-        return *this + (-rhs);
+        return from_raw(mr().sub(val_, rhs.val_));
     }
 
     mint& operator-=(const mint &rhs) {
-        return *this += -rhs;
+        return *this = *this - rhs;
     }
 
     mint operator*(const mint &rhs) const {
@@ -407,11 +411,25 @@ using DynamicMMInt62 = MontgomeryModInt<impl::DynamicMontgomeryReductionContext<
 using DynamicMMInt64 = MontgomeryModInt<impl::DynamicMontgomeryReductionContext<uint64_t, false>>;
 
 /**
- * \brief Type alias for dynamic MontgomeryModInt with the given underlying type
+ * \brief Given a modulus, calls a callable (visitor) with a dynamically selected fastest MontgomeryModInt type.
+ * 
+ * The visitor is called like `visitor(mint(x))` where `mint` is the fastest dynamic MontgomeryModInt type that can
+ * handle `mod` as the modulus, and its modulus set to `mod`. The visitor should be able to accept different dynamic
+ * MontgomeryModInt types, similar to the visitor for std::visit.
+ * 
  * \related MontgomeryModInt
- * \tparam UInt An unsigned integer type.
  */
-template<typename UInt>
-using DynamicMMInt = MontgomeryModInt<impl::DynamicMontgomeryReductionContext<UInt, false>>;
+template<typename Visitor, typename UInt>
+auto visit_by_modulus(Visitor&& visitor, UInt mod, UInt x = 0) {
+    if (mod <= std::numeric_limits<UInt>::max() / 4) {
+        using mint = MontgomeryModInt<impl::DynamicMontgomeryReductionContext<UInt, true>>;
+        auto _guard = mint::set_mod_guard(mod);
+        return visitor(mint(x));
+    } else {
+        using mint = MontgomeryModInt<impl::DynamicMontgomeryReductionContext<UInt, false>>;
+        auto _guard = mint::set_mod_guard(mod);
+        return visitor(mint(x));
+    }
+};
 
 }  // namespace cplib

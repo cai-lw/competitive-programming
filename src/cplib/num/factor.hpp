@@ -16,8 +16,9 @@ struct FactorizationResult {
 };
 
 // https://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf
-template<typename ModInt, typename T = typename ModInt::int_type>
-T pollard_rho_modint() {
+template<typename ModInt>
+typename ModInt::int_type pollard_rho_modint() {
+    using T = typename ModInt::int_type;
     const T n = ModInt::mod();
     constexpr T m = std::numeric_limits<T>::digits;
     T r = 1, g;
@@ -60,13 +61,6 @@ T pollard_rho_modint() {
 }
 
 template<typename T>
-T pollard_rho(T n) {
-    using mint = DynamicMMInt<T>;
-    auto _guard = mint::set_mod_guard(n);
-    return pollard_rho_modint<mint>();
-}
-
-template<typename T>
 void factorize_work(FactorizationResult<T> &result) {
     T n = result.factors.back();
     result.factors.pop_back();
@@ -76,10 +70,10 @@ void factorize_work(FactorizationResult<T> &result) {
         return;
     }
     if (f == 0) {
-        if (n < (1 << 30)) {
-            f = pollard_rho<uint32_t>(n);
+        if (n < (1ull << 32)) {
+            f = visit_by_modulus([](auto mint) { return pollard_rho_modint<decltype(mint)>(); }, uint32_t(n));
         } else {
-            f = pollard_rho<uint64_t>(n);
+            f = visit_by_modulus([](auto mint) { return pollard_rho_modint<decltype(mint)>(); }, n);
         }
     }
     result.factors.push_back(f);

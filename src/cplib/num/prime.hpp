@@ -9,9 +9,9 @@ namespace cplib {
 
 namespace impl {
 
-template<typename ModInt, typename T = typename ModInt::int_type>
-T miller_rabin(ModInt a, T d, int r) {
-    const ModInt one(1), minus_one(-1);
+template<typename ModInt>
+typename ModInt::int_type miller_rabin(typename ModInt::int_type a_, typename ModInt::int_type d, int r) {
+    const ModInt a(a_), one(1), minus_one(-1);
     ModInt x = pow(a, d);
     if (x == one || x == minus_one) {
         return 1;
@@ -27,6 +27,34 @@ T miller_rabin(ModInt a, T d, int r) {
         }
     }
     return 0;
+}
+
+template<typename ModInt>
+uint32_t miller_rabin_32() {
+    const uint32_t n = ModInt::mod();
+    int r = port::countr_zero(n - 1);
+    uint32_t d = (n - 1) >> r;
+    for (uint32_t a : {2, 7, 61}) {
+        uint32_t ret = miller_rabin<ModInt>(a, d, r);
+        if (ret != 1) {
+            return ret;
+        }
+    }
+    return 1;
+}
+
+template<typename ModInt>
+uint64_t miller_rabin_64() {
+    const uint64_t n = ModInt::mod();
+    int r = port::countr_zero(n - 1);
+    uint64_t d = (n - 1) >> r;
+    for (uint64_t a : {2, 325, 9375, 28178, 450775, 9780504, 1795265022}) {
+        uint64_t ret = miller_rabin<ModInt>(a, d, r);
+        if (ret != 1) {
+            return ret;
+        }
+    }
+    return 1;
 }
 
 constexpr uint64_t small_primes_mask() {
@@ -53,17 +81,7 @@ static uint32_t prime_or_factor_32(uint32_t n) {
     if (g != 1) {
         return g != n ? g : 0;
     }
-    using mint = DynamicMMInt32;
-    auto _guard = mint::set_mod_guard(n);
-    int r = port::countr_zero(n - 1);
-    uint32_t d = (n - 1) >> r;
-    for (uint32_t a : {2, 7, 61}) {
-        uint32_t ret = miller_rabin(mint(a), d, r);
-        if (ret != 1) {
-            return ret;
-        }
-    }
-    return 1;
+    return visit_by_modulus([](auto mint) { return miller_rabin_32<decltype(mint)>(); }, n);
 }
 
 static uint64_t prime_or_factor_64(uint64_t n) {
@@ -78,17 +96,7 @@ static uint64_t prime_or_factor_64(uint64_t n) {
     if (g != 1) {
         return g != n ? g : 0;
     }
-    using mint = DynamicMMInt64;
-    auto _guard = mint::set_mod_guard(n);
-    int r = port::countr_zero(n - 1);
-    uint64_t d = (n - 1) >> r;
-    for (uint64_t a : {2, 325, 9375, 28178, 450775, 9780504, 1795265022}) {
-        uint64_t ret = miller_rabin(mint(a), d, r);
-        if (ret != 1) {
-            return ret;
-        }
-    }
-    return 1;
+    return visit_by_modulus([](auto mint) { return miller_rabin_64<decltype(mint)>(); }, n);
 }
 
 }  // namespace impl
@@ -114,7 +122,7 @@ static uint64_t prime_or_factor_64(uint64_t n) {
  */
 template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
 T prime_or_factor(T n) {
-    if (n < (1 << 30)) {
+    if (n < (1ull << 32)) {
         return impl::prime_or_factor_32(n);
     } else {
         return impl::prime_or_factor_64(n);

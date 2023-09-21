@@ -1,7 +1,7 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/sqrt_mod"
 
 #include <bits/stdc++.h>
-#include "cplib/num/mod_math.hpp"
+#include "cplib/num/sqrt.hpp"
 using namespace std;
 using namespace cplib;
 

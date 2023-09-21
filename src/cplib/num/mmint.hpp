@@ -112,7 +112,7 @@ public:
     constexpr int_type add(int_type a, int_type b) const {
         int_type r = a + b;
         // r < a (and r < b) happens if and only if a + b overflows.
-        return r < a || r > this->mod_ ? r - this->mod_ : r;
+        return r < a || r >= this->mod_ ? r - this->mod_ : r;
     }
 
     // (-a)%N

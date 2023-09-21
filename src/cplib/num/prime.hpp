@@ -53,9 +53,8 @@ static uint32_t prime_or_factor_32(uint32_t n) {
     if (g != 1) {
         return g != n ? g : 0;
     }
-    using ctx = DynamicMontgomeryReductionContext<uint32_t>;
-    auto _guard = ctx::set_mod(n);
-    using mint = MontgomeryModInt<ctx>;
+    using mint = DynamicMMInt32;
+    auto _guard = mint::set_mod_guard(n);
     int r = port::countr_zero(n - 1);
     uint32_t d = (n - 1) >> r;
     for (uint32_t a : {2, 7, 61}) {
@@ -79,9 +78,8 @@ static uint64_t prime_or_factor_64(uint64_t n) {
     if (g != 1) {
         return g != n ? g : 0;
     }
-    using ctx = DynamicMontgomeryReductionContext<uint64_t>;
-    auto _guard = ctx::set_mod(n);
-    using mint = MontgomeryModInt<ctx>;
+    using mint = DynamicMMInt64;
+    auto _guard = mint::set_mod_guard(n);
     int r = port::countr_zero(n - 1);
     uint64_t d = (n - 1) >> r;
     for (uint64_t a : {2, 325, 9375, 28178, 450775, 9780504, 1795265022}) {
@@ -113,8 +111,6 @@ static uint64_t prime_or_factor_64(uint64_t n) {
  * * [Finding factors in Miller-Rabin test](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test#Variants_for_finding_factors).
  * 
  * \tparam T An unsigned integer type.
- * \param n Integer no larger than \f$2^{62}-1\f$, the largest modulus allowed by MontgomeryModInt, which is used in
- * this implementation.
  */
 template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
 T prime_or_factor(T n) {
@@ -131,8 +127,6 @@ T prime_or_factor(T n) {
  * \see prime_or_factor() Implementation details.
  * 
  * \tparam T An unsigned integer type.
- * \param n Integer no larger than \f$2^{62}-1\f$, the largest modulus allowed by MontgomeryModInt, which is used in
- * this implementation.
  */
 template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
 bool is_prime(T n) {

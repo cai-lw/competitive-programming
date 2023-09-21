@@ -83,7 +83,7 @@ public:
     BitDict() : size_(0), zeros_(0) {}
 
     /**
-     * \brief Creates a BitDict with the given contiguously stored bit sequence, initialized to all zeroes.
+     * \brief Creates a BitDict with `num_bits` bits, all initialized to 0.
      * 
      * Use set() or fill_with_bit_generator() to set its content.
      */

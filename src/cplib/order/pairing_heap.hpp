@@ -2,7 +2,6 @@
 
 #include <functional>
 #include <vector>
-#include <iostream>
 #include <string>
 
 namespace cplib {

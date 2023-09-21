@@ -16,5 +16,5 @@ TEST_CASE("Primality test", "[prime]") {
     REQUIRE(!is_prime(4294967295u));
     REQUIRE(!is_prime(998244353ull * 1000000007ull));
     REQUIRE(is_prime((1ull << 61) - 1));
-    REQUIRE(!is_prime((1ull << 62) - 1));
+    REQUIRE(!is_prime(0xFFFFFFFFFFFFFFFFull));
 }

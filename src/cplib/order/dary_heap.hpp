@@ -5,6 +5,15 @@
 
 namespace cplib {
 
+namespace impl {
+
+template<typename T, typename Comp = std::less<T>, int D = 8>
+struct DaryHeapNormalImpl {
+
+};
+
+}
+
 /**
  * \brief D-ary heap, slightly faster than binary heap due to less random memory access.
  * \ingroup order
@@ -24,16 +33,16 @@ struct DaryHeap {
 public:
     using size_type = std::size_t;
 
-    DaryHeap() : arr(), comp() {}
+    DaryHeap() : arr_(), comp_() {}
 
     /** \brief Returns the number of elements. */
-    size_type size() const { return arr.size(); }
+    size_type size() const { return arr_.size(); }
 
     /** \brief Returns whether the heap is empty. */
-    bool empty() const { return arr.empty(); }
+    bool empty() const { return arr_.empty(); }
 
     /** \brief Returns the top element. */
-    const T& top() { return arr.front(); }
+    const T& top() { return arr_.front(); }
 
     /**
      * \brief Insert an element into the heap.
@@ -41,22 +50,22 @@ public:
      * Compare and swap elements \f$O(\log_D N)\f$ times.
      */
     void push(const T &t) {
-        arr.push_back(t);
-        _sift_up();
+        arr_.push_back(t);
+        sift_up_();
     }
 
     /** \copydoc push(const T&) */
     void push(T &&t) {
-        arr.push_back(std::move(t));
-        _sift_up();
+        arr_.push_back(std::move(t));
+        sift_up_();
     }
 
     /** \brief Construct a new element in place in the heap.
      * \copydetails push(const T&) */
     template<typename... Args>
     void emplace(Args&&... args) {
-        arr.emplace_back(std::forward<Args>(args)...);
-        _sift_up();
+        arr_.emplace_back(std::forward<Args>(args)...);
+        sift_up_();
     }
 
     /**
@@ -66,34 +75,34 @@ public:
      * Compare elements \f$O(D\log_D N)\f$ times and swap them \f$O(\log_D N)\f$ times.
      */
     void pop() {
-        arr.front() = std::move(arr.back());
-        arr.pop_back();
-        _sift_down();
+        arr_.front() = std::move(arr_.back());
+        arr_.pop_back();
+        sift_down_();
     }
 
 private:
-    std::vector<T> arr;
-    Comp comp;
+    std::vector<T> arr_;
+    Comp comp_;
 
-    void _sift_up() {
-        size_type i = arr.size() - 1;
-        while (i > 0 && comp(arr[i], arr[(i - 1) / D])) {
-            std::swap(arr[i], arr[(i - 1) / D]);
+    void sift_up_() {
+        size_type i = arr_.size() - 1;
+        while (i > 0 && comp_(arr_[i], arr_[(i - 1) / D])) {
+            std::swap(arr_[i], arr_[(i - 1) / D]);
             i = (i - 1) / D;
         }
     }
 
-    void _sift_down() {
+    void sift_down_() {
         size_type i = 0;
-        while (i * D + 1 < arr.size()) {
+        while (i * D + 1 < arr_.size()) {
             size_type min_child = i * D + 1;
-            for (size_type child = i * D + 2; child <= std::min(i * D + D, arr.size()); child++) {
-                if (comp(arr[child], arr[min_child])) {
+            for (size_type child = i * D + 2; child < std::min(i * D + (D + 1), arr_.size()); child++) {
+                if (comp_(arr_[child], arr_[min_child])) {
                     min_child = child;
                 }
             }
-            if (comp(arr[min_child], arr[i])) {
-                std::swap(arr[min_child], arr[i]);
+            if (comp_(arr_[min_child], arr_[i])) {
+                std::swap(arr_[min_child], arr_[i]);
                 i = min_child;
             } else {
                 break;

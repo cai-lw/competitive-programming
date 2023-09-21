@@ -11,60 +11,163 @@ namespace cplib {
 namespace impl {
 
 template<typename UInt>
-class MontgomeryReduction {
+class MontgomeryReductionBase {
 public:
     using int_type = UInt;
     using int_double_t = make_double_width_t<int_type>;
-    static constexpr int base_width = std::numeric_limits<int_type>::digits;
 
-    constexpr explicit MontgomeryReduction(int_type mod) :
-        _mod(mod),
-        _mod_neg_inv(inv_base(~(mod - 1))),
-        _mbase((int_double_t(1) << base_width) % mod),
-        _mbase2(int_double_t(_mbase) * _mbase % mod),
-        _mbase3(int_double_t(_mbase2) * _mbase % mod)
+    constexpr explicit MontgomeryReductionBase(int_type mod) :
+        mod_(mod),
+        mod_neg_inv_(inv_base(-mod)),
+        mbase_((int_double_t(1) << base_width_) % mod),
+        mbase2_(int_double_t(mbase_) * mbase_ % mod),
+        mbase3_(int_double_t(mbase2_) * mbase_ % mod)
         {}
 
     // N
-    constexpr int_type mod() const { return _mod; }
+    constexpr int_type mod() const { return mod_; }
 
     // R%N
-    constexpr int_type mbase() const { return _mbase; }
+    constexpr int_type mbase() const { return mbase_; }
 
     // R^2%N
-    constexpr int_type mbase2() const { return _mbase2; }
+    constexpr int_type mbase2() const { return mbase2_; }
 
     // R^3%N
-    constexpr int_type mbase3() const { return _mbase3; }
+    constexpr int_type mbase3() const { return mbase3_; }
 
-    // T*(R^-1)%N. Result <2N if input <2N*2N.
-    constexpr int_type reduce(int_double_t t) const {
-        int_type m = int_type(t) * _mod_neg_inv;
-        int_type r = (t + int_double_t(m) * _mod) >> base_width;
-        return r;
-    }
-
-    // Shrink value from [0,4N) into [0,2N)
-    constexpr int_type shrink(int_type x) const {
-        return x >= _mod * 2 ? x - _mod * 2 : x;
-    }
-
-    // Shrink value from [0,2N) into [0,N)
-    constexpr int_type strict_shrink(int_type x) const {
-        return x >= _mod ? x - _mod : x;
-    }
+protected:
+    int_type mod_, mod_neg_inv_, mbase_, mbase2_, mbase3_;
+    static constexpr int base_width_ = std::numeric_limits<int_type>::digits;
 
 private:
-    int_type _mod, _mod_neg_inv, _mbase, _mbase2, _mbase3;
-
     // Modular inverse modulo 2^2^k by Hensel lifting.
     static constexpr int_type inv_base(int_type x) {
         int_type y = 1;
-        for (int i = 1; i < base_width; i *= 2) {
+        for (int i = 1; i < base_width_; i *= 2) {
             y *= int_type(2) - x * y;
         }
         return y;
     }
+};
+
+// Value in [0,2N), only works if N<R/4
+template<typename UInt>
+class MontgomeryReductionLoose : public MontgomeryReductionBase<UInt> {
+public:
+    using Base = MontgomeryReductionBase<UInt>;
+    using typename Base::int_type;
+    using typename Base::int_double_t;
+    using Base::Base;
+
+    // a*b*(R^-1)%N. Result <2N if input <2N.
+    constexpr int_type mul(int_type a, int_type b) const {
+        int_double_t t = int_double_t(a) * b;
+        int_type m = int_type(t) * this->mod_neg_inv_;
+        int_type r = (t + int_double_t(m) * this->mod_) >> this->base_width_;
+        return r;
+    }
+
+    // (a+b)%N. Result <2N if input <2N.
+    constexpr int_type add(int_type a, int_type b) const {
+        int_type r = a + b;
+        return r >= this->mod_ * 2 ? r - this->mod_ * 2 : r;
+    }
+
+    // (-a)%N. Result <2N if input <2N.
+    constexpr int_type negate(int_type x) const {
+        return x == 0 ? 0 : this->mod_ * 2 - x;
+    }
+
+    // Shrink value from [0,2N) into [0,N)
+    constexpr int_type shrink(int_type x) const {
+        return x >= this->mod_ ? x - this->mod_ : x;
+    }
+};
+
+// Value in [0,N), works for all N<R
+template<typename UInt>
+class MontgomeryReductionStrict : public MontgomeryReductionBase<UInt> {
+public:
+    using Base = MontgomeryReductionBase<UInt>;
+    using typename Base::int_type;
+    using typename Base::int_double_t;
+    using Base::Base;
+
+    // a*b*(R^-1)%N
+    constexpr int_type mul(int_type a, int_type b) const {
+        int_double_t t = int_double_t(a) * b;
+        int_type m = int_type(t) * this->mod_neg_inv_;
+        int_double_t s = t + int_double_t(m) * this->mod_;
+        int_type r = s >> this->base_width_;
+        if (s < t) {  // addition overflows
+            r += (int_double_t(1) << this->base_width_) - this->mod_;
+        } else if (r >= this->mod_) {
+            r -= this->mod_;
+        }
+        return r;
+    }
+
+    // (a+b)%N
+    constexpr int_type add(int_type a, int_type b) const {
+        int_type r = a + b;
+        // r < a (and r < b) happens if and only if a + b overflows.
+        return r < a || r > this->mod_ ? r - this->mod_ : r;
+    }
+
+    // (-a)%N
+    constexpr int_type negate(int_type x) const {
+        return x == 0 ? 0 : this->mod_ - x;
+    }
+
+    // No-op
+    constexpr int_type shrink(int_type x) const {
+        return x;
+    }
+};
+
+template<typename UInt, UInt Mod, std::enable_if_t<std::is_unsigned_v<UInt>>* = nullptr>
+class StaticMontgomeryReductionContext {
+public:
+    using int_type = UInt;
+    using mr_type = std::conditional_t<Mod <= std::numeric_limits<int_type>::max() / 4,
+                                       impl::MontgomeryReductionLoose<int_type>,
+                                       impl::MontgomeryReductionStrict<int_type>>;
+    static_assert(Mod % 2 == 1);
+
+    static constexpr const mr_type& montgomery_reduction() {
+        return reduction_;
+    }
+
+private:
+    static constexpr auto reduction_ = mr_type(Mod);
+};
+
+template<typename UInt, bool Loose, std::enable_if_t<std::is_unsigned_v<UInt>>* = nullptr>
+class DynamicMontgomeryReductionContext {
+public:
+    using int_type = UInt;
+    using mr_type = std::conditional_t<Loose, impl::MontgomeryReductionLoose<int_type>,
+                                       impl::MontgomeryReductionStrict<int_type>>;
+
+    static constexpr const mr_type& montgomery_reduction() {
+        return reduction_env_.back();
+    }
+
+    static void push_mod(int_type mod) {
+        assert(mod % 2 == 1);
+        if constexpr (Loose) {
+            assert(mod <= std::numeric_limits<int_type>::max() / 4);
+        }
+        reduction_env_.emplace_back(mod);
+    }
+
+    static void pop_mod() {
+        reduction_env_.pop_back();
+    }
+
+private:
+    static inline std::vector<mr_type> reduction_env_;
 };
 
 }  // namespace impl
@@ -73,8 +176,8 @@ private:
  * \brief Modular integer stored in Montgomery form.
  * \ingroup num
  * 
- * For static modint, your code should generally use the type alias ::MMInt or ::MMInt64. For dynamic modint, see
- * DynamicMontgomeryReductionContext for example.
+ * Your code should generally use the type alias ::MMInt or ::MMInt64 for compile-time static modulus, or one of
+ * ::DynamicMMInt30, ::DynamicMMInt32, ::DynamicMMInt62, ::DynamicMMInt64 and ::DynamicMMInt for dynamic modulus.
  * 
  * Unless converting between modular integers and ordinary integers very frequently (which is rarely the case),
  * Montgomery modular integer is preferred over plain modular integer (such as `atcoder::modint`).
@@ -84,8 +187,8 @@ private:
  * Thus, for 32-bit modulus Barrett reduction is less SIMD-friendly due to requiring 128-bit multiplication,
  * and for 64-bit modulus Barrett reduction is significantly slower due to requiring multi-precision multiplication.
  * 
- * This implementation makes further optimization to reduce branching and improve SIMD-friendliness, at the cost of
- * requiring \f$N<R/4\f$, where \f$N\f$ is the modulus and \f$R=2^{32}\f$ or \f$2^{64}\f$ the Montgomery divisor.
+ * When \f$N<R/4\f$, where \f$N\f$ is the modulus and \f$R=2^{32}\f$ or \f$2^{64}\f$ the Montgomery divisor,
+ * this implementation makes further optimization to reduce branching and improve SIMD-friendliness.
  * We keep everything in \f$[0,2N)\f$ instead of \f$[0,N)\f$. The result of multiplication-Montgomery reduction of
  * two numbers less than \f$2N\f$, even without the final reduction step, is already less than
  * \f$((2N)(2N)+NR)/R=N(4N/R)+N<2N\f$, thus the final reduction step is not needed.
@@ -95,13 +198,15 @@ private:
  */
 template<typename Context>
 class MontgomeryModInt {
+    struct Guard;
+
 public:
     using mint = MontgomeryModInt;
     using int_type = typename Context::int_type;
     using mr_type = typename Context::mr_type;
     using int_double_t = typename mr_type::int_double_t;
 
-    MontgomeryModInt() : _val(0) {}
+    MontgomeryModInt() : val_(0) {}
 
     /**
      * \brief Converts a plain integer to a Montgomery modular integer.
@@ -111,32 +216,59 @@ public:
      */
     template<typename T, std::enable_if_t<std::is_integral_v<T> && std::is_signed_v<T>>* = nullptr>
     explicit MontgomeryModInt(T x) {
-        using signed_int_type = std::make_signed_t<int_type>;
-        signed_int_type v = x % signed_int_type(mr().mod());
-        _val = mr().reduce(mr().mbase2() * int_double_t(v < 0 ? v + mr().mod() : v));
+        using U = std::make_unsigned_t<T>;
+        if (x >= 0) {
+            *this = MontgomeryModInt(U(x));
+        } else {
+            U x_abs = x == std::numeric_limits<T>::min() ? U(std::numeric_limits<T>::max()) + 1 : U(-x);
+            std::conditional_t<(sizeof(int_type) > sizeof(U)), int_type, U> mod_big = mr().mod();
+            mod_big <<= port::countl_zero(mod_big);  // Highest bit is 1, guaranteed to be no smaller than x_abs
+            *this = MontgomeryModInt(mod_big - x_abs);
+        }
     }
 
     /** \copydoc MontgomeryModInt(T) */
     template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
     explicit MontgomeryModInt(T x) {
-        _val = mr().reduce(mr().mbase2() * int_double_t(x % mr().mod()));
-    }
-    
-    /** \brief Converts back to a plain integer in the range \f$[0,N)\f$. */
-    int_type val() const {
-        return mr().strict_shrink(mr().reduce(_val));
+        val_ = mr().mul(mr().mbase2(), int_double_t(x % mr().mod()));
     }
 
-    /** \brief Returns a hash code that is the same for the same residue class modulo the modulus. */
+    /**
+     * \brief Set the dynamic modint's modulus.
+     * 
+     * Calling this for static modint would be a compile error.
+     * 
+     * It maintains a stack of moduli. Push stack when it is called, and pop stack when the returned guard object is
+     * destructed. This allows recursively calling functions that use different moduli. However at any given moment
+     * you can only use one modulus.
+     * 
+     * \param mod Must be odd.
+     */
+    [[nodiscard]]
+    static Guard set_mod_guard(int_type mod) {
+        Context::push_mod(mod);
+        return Guard();
+    }
+
+    /** \brief Converts back to a plain integer in the range \f$[0,N)\f$. */
+    int_type val() const {
+        return mr().shrink(mr().mul(1, val_));
+    }
+
+    /**
+     * \brief Returns a number that is the same for the same residue class modulo the modulus.
+     *
+     * This is faster than val(), but the number is not the remainder. Useful as key in associative containers. 
+     */
     int_type residue() const {
-        return mr().strict_shrink(_val);
+        return mr().shrink(val_);
     }
 
     /** \brief Returns the modulus. */
     static constexpr int_type mod() { return mr().mod(); }
 
     mint& operator++() {
-        _val = mr().shrink(_val + mr().mbase());
+        val_ = mr().add(val_, mr().mbase());
         return *this;
     }
 
@@ -150,19 +282,16 @@ public:
         return *this;
     }
 
-    mint& operator+=(const mint &rhs) {
-        _val = mr().shrink(_val + rhs._val);
-        return *this;
+    mint operator+(const mint &rhs) const {
+        return from_raw(mr().add(val_, rhs.val_));
     }
 
-    mint operator+(const mint &rhs) const {
-        mint ret = *this;
-        ret += rhs;
-        return ret;
+    mint& operator+=(const mint &rhs) {
+        return *this = *this + rhs;
     }
 
     mint& operator--() {
-        _val = mr().shrink(_val + mr().mod() - mr().mbase());
+        val_ = mr().shrink(val_ + mr().mod() - mr().mbase());
         return *this;
     }
 
@@ -173,29 +302,23 @@ public:
     }
 
     mint operator-() const {
-        return from_raw(_val == 0 ? 0 : mr().mod() * 2 - _val);
-    }
-
-    mint& operator-=(const mint &rhs) {
-        _val = mr().shrink(_val + mr().mod() * 2 - rhs._val);
-        return *this;
+        return from_raw(mr().negate(val_));
     }
 
     mint operator-(const mint &rhs) const {
-        mint ret = *this;
-        ret -= rhs;
-        return ret;
+        return *this + (-rhs);
     }
 
-    mint& operator*=(const mint &rhs) {
-        _val = mr().reduce(int_double_t(_val) * rhs._val);
-        return *this;
+    mint& operator-=(const mint &rhs) {
+        return *this += -rhs;
     }
 
     mint operator*(const mint &rhs) const {
-        mint ret = *this;
-        ret *= rhs;
-        return ret;
+        return from_raw(mr().mul(val_, rhs.val_));
+    }
+
+    mint& operator*=(const mint &rhs) {
+        return *this = *this * rhs;
     }
 
     /**
@@ -204,21 +327,19 @@ public:
      * Requires the underlying value to be invertible, i.e. coprime with the modulus.
      */
     mint inv() const {
-        return from_raw(mr().reduce(int_double_t(mr().mbase3()) * mod_inverse(_val, mr().mod())));
+        return from_raw(mr().mul(mr().mbase3(), mod_inverse(val_, mr().mod())));
+    }
+
+    mint operator/(const mint &rhs) const {
+        return *this * rhs.inv();
     }
 
     mint& operator/=(const mint &rhs) {
         return *this *= rhs.inv();
     }
 
-    mint operator/(const mint &rhs) const {
-        mint ret = *this;
-        ret /= rhs;
-        return ret;
-    }
-
     bool operator==(const mint &rhs) const {
-        return mr().strict_shrink(_val) == mr().strict_shrink(rhs._val);
+        return residue() == rhs.residue();
     }
 
     bool operator!=(const mint &rhs) const {
@@ -226,11 +347,17 @@ public:
     }
 
 private:
-    int_type _val;
+    int_type val_;
+
+    struct Guard {
+        ~Guard() {
+            Context::pop_mod();
+        }
+    };
 
     static constexpr mint from_raw(int_type x) {
         mint ret;
-        ret._val = x;
+        ret.val_ = x;
         return ret;
     }
 
@@ -240,113 +367,51 @@ private:
 };
 
 /**
- * \brief Compile-time constant modulus for Montgomery reduction.
- * \ingroup num
- * 
- * All necessary information is computed at compile-time.
- * 
- * \tparam UInt An unsigned integer type.
- * \tparam Mod The modulus. Must be odd and no larger than than 1/4 of `UInt`'s maximum value.
- * \see MontgomeryModInt
- */
-template<typename UInt, UInt Mod, std::enable_if_t<std::is_unsigned_v<UInt>>* = nullptr>
-class StaticMontgomeryReductionContext {
-public:
-    using int_type = UInt;
-    using mr_type = impl::MontgomeryReduction<int_type>;
-    static_assert(Mod % 2 == 1 && Mod <= std::numeric_limits<int_type>::max() / 4);
-
-    static constexpr const mr_type& montgomery_reduction() {
-        return _reduction;
-    }
-
-private:
-    static constexpr auto _reduction = mr_type(Mod);
-};
-
-/**
- * \brief Runtime mutable modulus for Montgomery reduction.
- * \ingroup num
- * 
- * Maintains a stack of moduli. Push stack when set_mod is called, and pop stack when the Guard object goes
- * out of scope. This allows recursively calling functions that use different moduli. However at any given moment
- * you can only use one modulus.
- * 
- * Creating a dynamic MontgomeryModInt under a modulus and using it under another is undefined behavior.
- * 
- * Below is an example of using this class for dynamic MontgomeryModInt.
- * 
- * ```
- * uint32_t do_something(uint32_t mod) {
- *     using ctx = DynamicMontgomeryReductionContext<uint32_t>;
- *     auto _guard = ctx::set_mod(mod);
- *     // Now the new modulus is pushed and `_guard` is alive.
- *     using mint = MontgomeryModInt<ctx>;
- *     mint ans(42);
- *     // Do some modular arithmetic here using the new modulus. It's okay to call functions that may use differnt
- *     // moduli, since their moduli will be popped after they finish.
- *     return ans.val();
- *     // `_guard` is destructed and the modulus is popped.
- * }
- * ```
- * 
- * \tparam UInt An unsigned integer type.
- */
-template<typename UInt, std::enable_if_t<std::is_unsigned_v<UInt>>* = nullptr>
-class DynamicMontgomeryReductionContext {
-public:
-    using int_type = UInt;
-    using mr_type = impl::MontgomeryReduction<int_type>;
-
-    struct Guard {
-        Guard(const Guard&) = delete;
-        Guard(Guard&&) = delete;
-        Guard& operator=(const Guard&) = delete;
-        Guard& operator=(Guard&&) = delete;
-        ~Guard() {
-            _reduction_env.pop_back();
-        }
-    private:
-        friend DynamicMontgomeryReductionContext;
-        Guard() {};
-    };
-
-    /**
-     * \brief Set the modulus.
-     * 
-     * The returned Guard object must stay alive when computing under this modulus.
-     * 
-     * \param mod Must be odd and no larger than than 1/4 of `UInt`'s maximum value.
-     */
-    [[nodiscard]]
-    static Guard set_mod(int_type mod) {
-        assert(mod % 2 == 1 && mod <= std::numeric_limits<int_type>::max() / 4);
-        _reduction_env.emplace_back(mod);
-        return Guard();
-    }
-
-    static constexpr const mr_type& montgomery_reduction() {
-        return _reduction_env.back();
-    }
-
-private:
-    static inline std::vector<mr_type> _reduction_env;
-};
-
-/**
  * \brief Type alias for 32-bit MontgomeryModInt with compile-time constant modulus.
  * \related MontgomeryModInt
- * \tparam Mod The modulus. Must be odd and no larger than \f$2^{30}-1\f$.
+ * \tparam Mod The modulus. Must be odd and less than \f$2^{32}\f$.
  */
 template<uint32_t Mod>
-using MMInt = MontgomeryModInt<StaticMontgomeryReductionContext<uint32_t, Mod>>;
+using MMInt = MontgomeryModInt<impl::StaticMontgomeryReductionContext<uint32_t, Mod>>;
 
 /**
  * \brief Type alias for 64-bit MontgomeryModInt with compile-time constant modulus.
  * \related MontgomeryModInt
- * \tparam Mod The modulus. Must be odd and no larger than \f$2^{62}-1\f$.
+ * \tparam Mod The modulus. Must be odd and less than \f$2^{64}\f$.
  */
 template<uint64_t Mod>
-using MMInt64 = MontgomeryModInt<StaticMontgomeryReductionContext<uint64_t, Mod>>;
+using MMInt64 = MontgomeryModInt<impl::StaticMontgomeryReductionContext<uint64_t, Mod>>;
+
+/**
+ * \brief Type alias for dynamic MontgomeryModInt with modulus less than \f$2^{30}\f$.
+ * \related MontgomeryModInt
+ */
+using DynamicMMInt30 = MontgomeryModInt<impl::DynamicMontgomeryReductionContext<uint32_t, true>>;
+
+/**
+ * \brief Type alias for dynamic MontgomeryModInt with modulus less than \f$2^{32}\f$.
+ * \related MontgomeryModInt
+ */
+using DynamicMMInt32 = MontgomeryModInt<impl::DynamicMontgomeryReductionContext<uint32_t, false>>;
+
+/**
+ * \brief Type alias for dynamic MontgomeryModInt with modulus less than \f$2^{62}\f$.
+ * \related MontgomeryModInt
+ */
+using DynamicMMInt62 = MontgomeryModInt<impl::DynamicMontgomeryReductionContext<uint64_t, true>>;
+
+/**
+ * \brief Type alias for dynamic MontgomeryModInt with modulus less than \f$2^{64}\f$.
+ * \related MontgomeryModInt
+ */
+using DynamicMMInt64 = MontgomeryModInt<impl::DynamicMontgomeryReductionContext<uint64_t, false>>;
+
+/**
+ * \brief Type alias for dynamic MontgomeryModInt with the given underlying type
+ * \related MontgomeryModInt
+ * \tparam UInt An unsigned integer type.
+ */
+template<typename UInt>
+using DynamicMMInt = MontgomeryModInt<impl::DynamicMontgomeryReductionContext<UInt, false>>;
 
 }  // namespace cplib

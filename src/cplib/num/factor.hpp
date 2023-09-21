@@ -61,9 +61,8 @@ T pollard_rho_modint() {
 
 template<typename T>
 T pollard_rho(T n) {
-    using ctx = DynamicMontgomeryReductionContext<T>;
-    auto _guard = ctx::set_mod(n);
-    using mint = MontgomeryModInt<ctx>;
+    using mint = DynamicMMInt<T>;
+    auto _guard = mint::set_mod_guard(n);
     return pollard_rho_modint<mint>();
 }
 
@@ -100,8 +99,6 @@ void factorize_work(FactorizationResult<T> &result) {
  * Time complexity is \f$O(N^{1/4})\f$ expected.
  * 
  * \tparam T An unsigned integer type.
- * \param n Integer no larger than \f$2^{62}-1\f$, the largest modulus allowed by MontgomeryModInt, which is used in
- * this implementation.
  */
 template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
 std::vector<T> factorize(T n) {

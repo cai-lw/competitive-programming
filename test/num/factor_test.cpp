@@ -19,5 +19,5 @@ TEST_CASE("Integer factorization", "[factor]") {
     REQUIRE(factorize(4294967295u) == vector<unsigned int>{3u, 5u, 17u, 257u, 65537u});
     REQUIRE(factorize((1ull << 61) - 1) == vector<unsigned long long>{(1ull << 61) - 1});
     REQUIRE(factorize(1ull << 61) == vector<unsigned long long>(61, 2ull));
-    REQUIRE(factorize((1ull << 62) - 1) == vector<unsigned long long>{3ull, 715827883ull, 2147483647ull});
+    REQUIRE(factorize(10000000000000000001ull) == vector<unsigned long long>{11ull, 909090909090909091ull});
 }

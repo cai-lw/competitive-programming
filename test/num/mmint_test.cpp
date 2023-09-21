@@ -40,21 +40,20 @@ TEST_CASE("Basic arithmetics with Montgomery modular integer", "[mmint]") {
     REQUIRE((test *= mint(6)).val() == 42u);
 }
 
-TEST_CASE("Identities with Montgomery modular integer", "[mmint]") {
-    constexpr unsigned int mod = 998244353;
-    using mint = MMInt<mod>;
+TEMPLATE_TEST_CASE("Identities with Montgomery modular integer", "[mmint]", MMInt<998244353>, MMInt<4294967291>) {
+    using mint = TestType;
     // Factorial
     unsigned long long fac = 1;
     mint mfac(1);
     for (int i = 1; i <= 20; i++) {
         fac *= i;
         mfac *= mint(i);
-        REQUIRE(mfac.val() == fac % mod);
+        REQUIRE(mfac.val() == fac % mint::mod());
     }
     for (int i = 1; i <= 20; i++) {
         fac /= i;
         mfac /= mint(i);
-        REQUIRE(mfac.val() == fac % mod);
+        REQUIRE(mfac.val() == fac % mint::mod());
     }
     // Sum of squares
     unsigned long long sum = 0;
@@ -62,24 +61,23 @@ TEST_CASE("Identities with Montgomery modular integer", "[mmint]") {
     for (int i = 1; i <= 2000; i++) {
         sum += i * i;
         msum += mint(i) * mint(i);
-        REQUIRE(msum.val() == sum % mod);
+        REQUIRE(msum.val() == sum % mint::mod());
         mint msum_direct = mint(i) * mint(i + 1) * mint(2 * i + 1) / mint(6);
         REQUIRE(msum == msum_direct);
-        REQUIRE(msum_direct.val() == sum % mod);
+        REQUIRE(msum_direct.val() == sum % mint::mod());
     }
 }
 
 TEST_CASE("Dynamic Montgomery modular integer", "[mmint]") {
-    using ctx = DynamicMontgomeryReductionContext<uint32_t>;
-    using mint = MontgomeryModInt<ctx>;
+    using mint = DynamicMMInt30;
     // Start as mod 11
-    auto _guard = ctx::set_mod(11);
+    auto _guard = mint::set_mod_guard(11);
     REQUIRE(mint::mod() == 11u);
     REQUIRE((mint(6) + mint(7)).val() == 2u);
     REQUIRE((mint(8) - mint(9)).val() == 10u);
     // Temporarily set mod to 13 in this scope
     {
-        auto _guard = ctx::set_mod(13);
+        auto _guard = mint::set_mod_guard(13);
         REQUIRE(mint::mod() == 13u);
         REQUIRE((mint(6) + mint(7)).val() == 0u);
         REQUIRE((mint(8) - mint(9)).val() == 12u);

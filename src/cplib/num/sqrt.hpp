@@ -64,8 +64,6 @@ std::optional<Fp> sqrt_mod_prime(Fp n){
  * If \f$x\neq 0\f$ then \f$p-x\f$ is always also a solution, and there is no other solution.
  * 
  * \tparam T An unsigned integer type
- * \param p A prime number no larger than 1/4 the maximum value of `T`. This is the same requirement for the modulus of
- * MontgomeryModInt since it is used for all modular arithmetic in this function.
  */
 template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
 std::optional<T> sqrt_mod_prime(T n, T p) {
@@ -73,9 +71,8 @@ std::optional<T> sqrt_mod_prime(T n, T p) {
         // Cannot use MontgomeryModInt since 2 is even.
         return n % 2;
     }
-    using ctx = DynamicMontgomeryReductionContext<T>;
-    auto _guard = ctx::set_mod(p);
-    using mint = MontgomeryModInt<ctx>;
+    using mint = DynamicMMInt<T>;
+    auto _guard = mint::set_mod_guard(p);
     std::optional<mint> ret = sqrt_mod_prime(mint(n));
     if (ret) {
         return ret->val();

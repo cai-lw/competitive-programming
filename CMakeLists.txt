@@ -20,6 +20,7 @@ add_executable(run_tests
     test/num/mmint_test.cpp
     test/num/sqrt_test.cpp
     test/num/prime_test.cpp
+    test/num/primitive_root_test.cpp
     test/num/factor_test.cpp
     test/conv/conv_test.cpp
     test/conv/multivar_test.cpp

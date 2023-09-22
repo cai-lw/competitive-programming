@@ -2,17 +2,17 @@
 
 namespace cplib {
 
-template<typename T>
+template <typename T>
 constexpr T pow(T base, unsigned long long exp) {
-    T res(1);
-    while (exp) {
-        if (exp & 1) {
-            res *= base;
-        }
-        base *= base;
-        exp >>= 1;
+  T res(1);
+  while (exp) {
+    if (exp & 1) {
+      res *= base;
     }
-    return res;
+    base *= base;
+    exp >>= 1;
+  }
+  return res;
 }
 
 }  // namespace cplib

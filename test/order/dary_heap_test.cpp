@@ -1,7 +1,7 @@
 #include <vector>
 #include <random>
 #include <algorithm>
-#include "catch2/catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "cplib/order/dary_heap.hpp"
 using namespace std;
 using namespace cplib;

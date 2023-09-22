@@ -1,5 +1,5 @@
 #include <cstdint>
-#include "catch2/catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "cplib/num/factor.hpp"
 using namespace std;
 using namespace cplib;

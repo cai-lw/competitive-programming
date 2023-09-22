@@ -1,5 +1,5 @@
 #include <vector>
-#include "catch2/catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "cplib/range/wavelet_array.hpp"
 using namespace std;
 using namespace cplib;

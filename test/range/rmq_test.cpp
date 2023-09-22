@@ -1,6 +1,7 @@
+#include <numeric>
 #include <vector>
 #include <utility>
-#include "catch2/catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "cplib/range/rmq.hpp"
 using namespace std;
 using namespace cplib;

@@ -29,15 +29,16 @@ oj-bundle -I /path/to/competitive-programming/src your_code.cpp > your_code.bund
 Also see files in `submissions/` for examples.
 
 ## Testing
-This project uses [Catch2](https://github.com/catchorg/Catch2/tree/v2.x) as the unit test framework, which is already
+This project uses [Catch2](https://github.com/catchorg/Catch2) as the unit test framework, which is already
 included in this repository as a git submodule. 
 
 Unit tests are located in `test/`. To build and run all unit tests, run:
 ```sh
+# It will take a while to build Catch2 when run the first time
 cmake -B build
 cd build
 make
-# You can also directly run the executable ./run_tests
+# For using test options you can run ctest or the executable itself ./run_tests
 make test
 ```
 

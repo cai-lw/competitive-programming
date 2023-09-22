@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(run_tests
-    test/run_tests.cpp
     test/range/rmq_test.cpp
     test/range/bit_dict_test.cpp
     test/range/wavelet_array_test.cpp
@@ -28,8 +27,8 @@ add_executable(run_tests
 )
 
 add_subdirectory(Catch2)
-target_link_libraries(run_tests Catch2::Catch2)
+target_link_libraries(run_tests PRIVATE Catch2WithMain)
 target_include_directories(run_tests PRIVATE src)
 
-include(Catch2/contrib/Catch.cmake)
+include(Catch2/extras/Catch.cmake)
 catch_discover_tests(run_tests)

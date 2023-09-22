@@ -1,4 +1,4 @@
-#include "catch2/catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "cplib/num/mmint.hpp"
 #include "cplib/conv/conv.hpp"
 #include "utils.hpp"

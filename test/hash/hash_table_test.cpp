@@ -9,16 +9,16 @@ TEST_CASE("Hash table with integers", "[hash_table]") {
     REQUIRE(table.insert(123));
     REQUIRE(table.insert(456));
     REQUIRE(table.insert(789));
-    REQUIRE(table.size() == 3);
-    REQUIRE(table.contains(123));
-    REQUIRE(table.contains(456));
-    REQUIRE(table.contains(789));
-    REQUIRE(!table.contains(321));
-    REQUIRE(!table.insert(789));
-    REQUIRE(!table.erase(654));
+    CHECK(table.size() == 3);
+    CHECK(table.contains(123));
+    CHECK(table.contains(456));
+    CHECK(table.contains(789));
+    CHECK_FALSE(table.contains(321));
+    REQUIRE_FALSE(table.insert(789));
+    REQUIRE_FALSE(table.erase(654));
     REQUIRE(table.erase(456));
-    REQUIRE(table.size() == 2);
-    REQUIRE(!table.contains(456));
+    CHECK(table.size() == 2);
+    CHECK_FALSE(table.contains(456));
 }
 
 TEST_CASE("Hash table with strings", "[hash_table]") {
@@ -26,14 +26,14 @@ TEST_CASE("Hash table with strings", "[hash_table]") {
     REQUIRE(table.insert("foo"));
     REQUIRE(table.insert("bar"));
     REQUIRE(table.insert("baz"));
-    REQUIRE(table.size() == 3);
-    REQUIRE(table.contains("foo"));
-    REQUIRE(table.contains("bar"));
-    REQUIRE(table.contains("baz"));
-    REQUIRE(!table.contains("quux"));
-    REQUIRE(!table.insert("bar"));
-    REQUIRE(!table.erase("boo"));
+    CHECK(table.size() == 3);
+    CHECK(table.contains("foo"));
+    CHECK(table.contains("bar"));
+    CHECK(table.contains("baz"));
+    CHECK_FALSE(table.contains("quux"));
+    REQUIRE_FALSE(table.insert("bar"));
+    REQUIRE_FALSE(table.erase("boo"));
     REQUIRE(table.erase("foo"));
-    REQUIRE(table.size() == 2);
-    REQUIRE(!table.contains("foo"));
+    CHECK(table.size() == 2);
+    CHECK_FALSE(table.contains("foo"));
 }

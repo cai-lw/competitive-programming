@@ -8,31 +8,31 @@ using namespace cplib;
 
 TEST_CASE("Small heap with small integers", "[dary_heap]") {
     DaryHeap<int> heap;
-    REQUIRE(heap.empty());
+    CHECK(heap.empty());
     heap.push(3);
     heap.push(1);
     heap.push(4);
-    REQUIRE(!heap.empty());
-    REQUIRE(heap.size() == 3);
-    REQUIRE(heap.top() == 1);
+    CHECK_FALSE(heap.empty());
+    CHECK(heap.size() == 3);
+    CHECK(heap.top() == 1);
     heap.pop();
-    REQUIRE(heap.size() == 2);
-    REQUIRE(heap.top() == 3);
+    CHECK(heap.size() == 2);
+    CHECK(heap.top() == 3);
     heap.push(1);
     heap.push(5);
     heap.push(9);
-    REQUIRE(heap.size() == 5);
-    REQUIRE(heap.top() == 1);
+    CHECK(heap.size() == 5);
+    CHECK(heap.top() == 1);
     heap.pop();
-    REQUIRE(heap.top() == 3);
+    CHECK(heap.top() == 3);
     heap.pop();
-    REQUIRE(heap.top() == 4);
+    CHECK(heap.top() == 4);
     heap.pop();
-    REQUIRE(heap.top() == 5);
+    CHECK(heap.top() == 5);
     heap.pop();
-    REQUIRE(heap.top() == 9);
+    CHECK(heap.top() == 9);
     heap.pop();
-    REQUIRE(heap.empty());
+    CHECK(heap.empty());
 }
 
 TEST_CASE("Heap with many integers inserted in random order", "[dary_heap]") {
@@ -46,9 +46,9 @@ TEST_CASE("Heap with many integers inserted in random order", "[dary_heap]") {
         heap.push(i);
     }
     for (int i = 0; i < N; i++) {
-        REQUIRE(heap.top() == i);
-        REQUIRE(heap.size() == N - i);
+        CHECK(heap.top() == i);
+        CHECK(heap.size() == N - i);
         heap.pop();
     }
-    REQUIRE(heap.empty());
+    CHECK(heap.empty());
 }

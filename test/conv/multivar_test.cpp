@@ -12,7 +12,7 @@ TEST_CASE("Small multivariate convolution", "[multivar]") {
     vector<mint> am = from_int_vec<mint>(a), bm = from_int_vec<mint>(b);
     am = multiply_multivar_fps(am, bm, shape);
     a = to_int_vec(am);
-    REQUIRE(a == vector<int>{7, 22, 30, 80, 73, 182});
+    CHECK(a == vector<int>{7, 22, 30, 80, 73, 182});
 }
 
 TEST_CASE("Large multivariate convolution", "[multivar]") {
@@ -23,6 +23,6 @@ TEST_CASE("Large multivariate convolution", "[multivar]") {
     am = multiply_multivar_fps(am, bm, shape);
     a = to_int_vec(am);
     for (size_t i = 0; i < (1 << DIM); i++) {
-        REQUIRE(a[i] == 1 << port::popcount(i));
+        CHECK(a[i] == 1 << port::popcount(i));
     }
 }

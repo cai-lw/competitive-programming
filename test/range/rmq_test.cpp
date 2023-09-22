@@ -8,21 +8,21 @@ using namespace cplib;
 TEST_CASE("RMQ with small integers", "[rmq]") {
     vector<int> data{3, 1, 4, 1, 5, 9, 2, 6, 5};
     RangeMinQuery<int> rmq(move(data));
-    REQUIRE(rmq.size() == 9);
-    REQUIRE(rmq.range_min(0, 3) == 1);
-    REQUIRE(rmq.range_min(4, 9) == 2);
-    REQUIRE(rmq.range_min(4, 6) == 5);
-    REQUIRE(rmq.range_min(7, 8) == 6);
+    CHECK(rmq.size() == 9);
+    CHECK(rmq.range_min(0, 3) == 1);
+    CHECK(rmq.range_min(4, 9) == 2);
+    CHECK(rmq.range_min(4, 6) == 5);
+    CHECK(rmq.range_min(7, 8) == 6);
 }
 
 TEST_CASE("RMQ with strings", "[rmq]") {
     vector<string> data{"one", "two", "three", "four", "five", "six"};
     RangeMinQuery<string> rmq(move(data));
-    REQUIRE(rmq.size() == 6);
-    REQUIRE(rmq.range_min(0, 6) == "five");
-    REQUIRE(rmq.range_min(0, 3) == "one");
-    REQUIRE(rmq.range_min(1, 3) == "three");
-    REQUIRE(rmq.range_min(1, 4) == "four");
+    CHECK(rmq.size() == 6);
+    CHECK(rmq.range_min(0, 6) == "five");
+    CHECK(rmq.range_min(0, 3) == "one");
+    CHECK(rmq.range_min(1, 3) == "three");
+    CHECK(rmq.range_min(1, 4) == "four");
 }
 
 struct TwoAdicNormCompare {
@@ -34,11 +34,11 @@ struct TwoAdicNormCompare {
 TEST_CASE("RMQ with custom comparison operator", "[rmq]") {
     vector<unsigned int> data{4, 5, 6, 7, 8, 9, 10};
     RangeMinQuery<unsigned int, TwoAdicNormCompare> rmq(move(data));
-    REQUIRE(rmq.size() == 7);
-    REQUIRE(rmq.range_min(0, 7) == 8);
-    REQUIRE(rmq.range_min(0, 4) == 4);
-    REQUIRE(rmq.range_min(1, 4) == 6);
-    REQUIRE(rmq.range_min(5, 6) == 9);
+    CHECK(rmq.size() == 7);
+    CHECK(rmq.range_min(0, 7) == 8);
+    CHECK(rmq.range_min(0, 4) == 4);
+    CHECK(rmq.range_min(1, 4) == 6);
+    CHECK(rmq.range_min(5, 6) == 9);
 }
 
 TEST_CASE("RMQ with large bitonic array", "[rmq]") {
@@ -47,11 +47,11 @@ TEST_CASE("RMQ with large bitonic array", "[rmq]") {
     iota(data.rbegin(), data.rend(), 0);
     iota(data.begin(), data.begin() + 500, 0);
     RangeMinQuery<int> rmq(move(data));
-    REQUIRE(rmq.size() == 1001);
-    REQUIRE(rmq.range_min(1, 1000) == 1);
-    REQUIRE(rmq.range_min(123, 456) == 123);
-    REQUIRE(rmq.range_min(456, 789) == 212);
-    REQUIRE(rmq.range_min(333, 666) == 333);
-    REQUIRE(rmq.range_min(666, 999) == 2);
-    REQUIRE(rmq.range_min(495, 505) == 495);
+    CHECK(rmq.size() == 1001);
+    CHECK(rmq.range_min(1, 1000) == 1);
+    CHECK(rmq.range_min(123, 456) == 123);
+    CHECK(rmq.range_min(456, 789) == 212);
+    CHECK(rmq.range_min(333, 666) == 333);
+    CHECK(rmq.range_min(666, 999) == 2);
+    CHECK(rmq.range_min(495, 505) == 495);
 }

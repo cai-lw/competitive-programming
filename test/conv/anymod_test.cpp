@@ -12,7 +12,7 @@ TEST_CASE("Small anymod convolution", "[anymod]") {
     vector<mint> am = from_int_vec<mint>(a), bm = from_int_vec<mint>(b);
     convolve_any_modint_inplace(am, bm);
     a = to_int_vec(am);
-    REQUIRE(a == vector<int>{5, 16, 34, 60, 70, 70, 59, 36});
+    CHECK(a == vector<int>{5, 16, 34, 60, 70, 70, 59, 36});
 }
 
 TEST_CASE("Large anymod convolution", "[anymod]") {
@@ -22,6 +22,6 @@ TEST_CASE("Large anymod convolution", "[anymod]") {
     convolve_any_modint_inplace(am, bm);
     a = to_int_vec(am);
     for (int i = 0; i < N * 2 - 1; i++) {
-        REQUIRE(a[i] == (unsigned long long)min(i + 1, N * 2 - 1 - i) * X2 % mint::mod());
+        CHECK(a[i] == (unsigned long long)min(i + 1, N * 2 - 1 - i) * X2 % mint::mod());
     }
 }

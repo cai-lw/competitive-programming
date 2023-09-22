@@ -76,6 +76,7 @@ typename ModInt::int_type primitive_root_unfactorized_modint() {
 
 /**
  * \brief Primitive root modulo a prime number.
+ * \ingroup num
  * 
  * For the given prime \f$p\f$, returns any \f$0<g<p\f$ such that the minimum positive integer \f$k\f$ that satisfies
  * \f$g^k\equiv 1 \pmod{p}\f$ is \f$p-1\f$.
@@ -91,6 +92,7 @@ T primitive_root_prime(T p) {
 
 /**
  * \brief Primitive root modulo any number.
+ * \ingroup num
  * 
  * For any primitive root \f$g\f$ the minimum positive integer \f$k\f$ that satisfies \f$g^k\equiv 1 \pmod{n}\f$ is
  * \f$\phi(n)\f$ where \f$\phi\f$ is Euler's totient function. Primitive root exists if and only if \f$n=2,4,p^k,2p^k\f$

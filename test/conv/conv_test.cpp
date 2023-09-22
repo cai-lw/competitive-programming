@@ -11,7 +11,7 @@ TEST_CASE("Small convolution", "[conv]") {
     vector<mint> am = from_int_vec<mint>(a), bm = from_int_vec<mint>(b);
     convolve_inplace2(am, bm);
     a = to_int_vec(am);
-    REQUIRE(a == vector<int>{5, 16, 34, 60, 70, 70, 59, 36});
+    CHECK(a == vector<int>{5, 16, 34, 60, 70, 70, 59, 36});
 }
 
 TEST_CASE("Large convolution", "[conv]") {
@@ -20,12 +20,12 @@ TEST_CASE("Large convolution", "[conv]") {
     convolve_inplace2(am, bm);
     a = to_int_vec(am);
     for (int i = 0; i < 123; i++) {
-        REQUIRE(a[i] == i + 1);
+        CHECK(a[i] == i + 1);
     }
     for (int i = 123; i < 456; i++) {
-        REQUIRE(a[i] == 123);
+        CHECK(a[i] == 123);
     }
     for (int i = 456; i < 578; i++) {
-        REQUIRE(a[i] == 578 - i);
+        CHECK(a[i] == 578 - i);
     }
 }

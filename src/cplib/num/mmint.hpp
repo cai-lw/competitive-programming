@@ -74,10 +74,9 @@ public:
         return r >= this->mod_ * 2 ? r - this->mod_ * 2 : r;
     }
 
-    // (-a)%N. Result <2N if input <2N.
+    // (a-b)%N. Result <2N if input <2N.
     constexpr int_type sub(int_type a, int_type b) const {
         int_type r = a - b;
-        // r > a if and only if a - b underflows.
         return r > a ? r + this->mod_ * 2 : r;
     }
 
@@ -96,31 +95,29 @@ public:
     using typename Base::int_double_t;
     using Base::Base;
 
+    // We use the same technique for the following functions where the result R is in [0,2N) where 2N may overflow.
+    // If the last step is R=X+Y where X,Y are in [0,N), we make it R'=X-(N-Y) so that the result is in [-N,N)
+    // The "true" value of R' is negative iff the last subtraction underflows, iff R'>X, and that's exactly when we
+    // add N to R' to bring the value back to [0,N).
+
     // a*b*(R^-1)%N
     constexpr int_type mul(int_type a, int_type b) const {
         int_double_t t = int_double_t(a) * b;
         int_type m = int_type(t) * this->mod_neg_inv_;
-        int_double_t s = t + int_double_t(m) * this->mod_;
+        int_double_t s = t - int_double_t(-m) * this->mod_;
         int_type r = s >> this->base_width_;
-        if (s < t) {  // addition overflows
-            r += (int_double_t(1) << this->base_width_) - this->mod_;
-        } else if (r >= this->mod_) {
-            r -= this->mod_;
-        }
-        return r;
+        return s > t ? r + this->mod_ : r;
     }
 
     // (a+b)%N
     constexpr int_type add(int_type a, int_type b) const {
         int_type r = a - (this->mod_ - b);
-        // (this->mod_ - b) is always positive. r < a if and only if a - (this->mod_ - b) underflows.
         return r > a ? r + this->mod_ : r;
     }
 
     // (a-b)%N
     constexpr int_type sub(int_type a, int_type b) const {
         int_type r = a - b;
-        // r > a if and only if a - b underflows.
         return r > a ? r + this->mod_ : r;
     }
 
@@ -220,21 +217,17 @@ public:
      */
     template<typename T, std::enable_if_t<std::is_integral_v<T> && std::is_signed_v<T>>* = nullptr>
     explicit MontgomeryModInt(T x) {
-        using U = std::make_unsigned_t<T>;
-        if (x >= 0) {
-            *this = MontgomeryModInt(U(x));
-        } else {
-            U x_abs = x == std::numeric_limits<T>::min() ? U(std::numeric_limits<T>::max()) + 1 : U(-x);
-            std::conditional_t<(sizeof(int_type) > sizeof(U)), int_type, U> mod_big = mr().mod();
-            mod_big <<= port::countl_zero(mod_big);  // Highest bit is 1, guaranteed to be no smaller than x_abs
-            *this = MontgomeryModInt(mod_big - x_abs);
+        auto r = x % impl::make_double_width_t<std::make_signed_t<int_type>>(mr().mod());
+        if (r < 0) {
+            r += mr().mod();
         }
+        val_ = mr().mul(mr().mbase2(), r);
     }
 
     /** \copydoc MontgomeryModInt(T) */
     template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
     explicit MontgomeryModInt(T x) {
-        val_ = mr().mul(mr().mbase2(), int_double_t(x % mr().mod()));
+        val_ = mr().mul(mr().mbase2(), x % mr().mod());
     }
 
     /**

@@ -25,8 +25,8 @@ namespace cplib {
  * \tparam T See fft_inplace() for requirements for `T`.
  */
 template <typename T>
-std::vector<T> multiply_multivar_fps(const std::vector<T> &a, const std::vector<T> &b,
-                                     const std::vector<std::size_t> &shape) {
+std::vector<T> multiply_multivar_fps(const std::vector<T>& a, const std::vector<T>& b,
+                                     const std::vector<std::size_t>& shape) {
   using usize = std::size_t;
   std::vector<usize> squeezed_shape;
   usize n = 1;

@@ -40,20 +40,20 @@ struct DaryHeap {
   bool empty() const { return arr_.empty(); }
 
   /** \brief Returns the top element. */
-  const T &top() { return arr_.front(); }
+  const T& top() { return arr_.front(); }
 
   /**
    * \brief Insert an element into the heap.
    *
    * Compare and swap elements \f$O(\log_D N)\f$ times.
    */
-  void push(const T &t) {
+  void push(const T& t) {
     arr_.push_back(t);
     sift_up_();
   }
 
   /** \copydoc push(const T&) */
-  void push(T &&t) {
+  void push(T&& t) {
     arr_.push_back(std::move(t));
     sift_up_();
   }
@@ -61,7 +61,7 @@ struct DaryHeap {
   /** \brief Construct a new element in place in the heap.
    * \copydetails push(const T&) */
   template <typename... Args>
-  void emplace(Args &&...args) {
+  void emplace(Args&&... args) {
     arr_.emplace_back(std::forward<Args>(args)...);
     sift_up_();
   }

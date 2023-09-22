@@ -27,10 +27,10 @@ int main() {
     cin >> x;
     b[i / MAX_LEN][i % MAX_LEN] = mint(x);
   }
-  for (auto &v : a) {
+  for (auto& v : a) {
     fft_inplace(v);
   }
-  for (auto &v : b) {
+  for (auto& v : b) {
     fft_inplace(v);
   }
   int la = a.size(), lb = b.size();
@@ -47,7 +47,7 @@ int main() {
       }
     }
   }
-  for (auto &v : a) {
+  for (auto& v : a) {
     ifft_inplace(v);
   }
   for (size_t i = 0; i < n + m - 1; i++) {

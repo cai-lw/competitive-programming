@@ -12,7 +12,7 @@ int main() {
   int n, q;
   cin >> n >> q;
   vector<uint32_t> a(n);
-  for (auto &x : a) {
+  for (auto& x : a) {
     cin >> x;
   }
   WaveletArray<uint32_t, 30> wa(move(a));

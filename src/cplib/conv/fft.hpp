@@ -14,7 +14,7 @@ namespace cplib {
 namespace impl {
 
 template <typename T>
-std::vector<T> twiddling_factors(const std::vector<T> &roots) {
+std::vector<T> twiddling_factors(const std::vector<T>& roots) {
   std::size_t n = 1 << (roots.size() - 2);
   std::vector<T> w, w_stack;
   w.reserve(n);
@@ -182,7 +182,7 @@ void ifft_inplace(RandomIt first, RandomIt last) {
  * \f$2^n\f$-th root of unity for all \f$0\leq n \leq L\f$.
  */
 template <typename T>
-void fft_inplace(std::vector<T> &a) {
+void fft_inplace(std::vector<T>& a) {
   fft_inplace(a.begin(), a.end());
 }
 
@@ -197,7 +197,7 @@ void fft_inplace(std::vector<T> &a) {
  * must exist in `T`.
  */
 template <typename T>
-void ifft_inplace(std::vector<T> &a) {
+void ifft_inplace(std::vector<T>& a) {
   ifft_inplace(a.begin(), a.end());
 }
 

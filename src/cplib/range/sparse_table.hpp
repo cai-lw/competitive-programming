@@ -24,13 +24,13 @@ class SparseTable {
   SparseTable() = default;
 
   /** \copydoc SparseTable(InputIt, InputIt) */
-  SparseTable(const std::vector<T> &data) : op() {
+  SparseTable(const std::vector<T>& data) : op() {
     table.emplace_back(data);
     _build();
   }
 
   /** \copydoc SparseTable(InputIt, InputIt) */
-  SparseTable(std::vector<T> &&data) : op() {
+  SparseTable(std::vector<T>&& data) : op() {
     table.emplace_back(std::move(data));
     _build();
   }

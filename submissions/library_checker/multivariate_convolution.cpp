@@ -15,7 +15,7 @@ int main() {
   cin >> k;
   vector<size_t> shape(k);
   size_t n = 1;
-  for (auto &d : shape) {
+  for (auto& d : shape) {
     cin >> d;
     n *= d;
   }

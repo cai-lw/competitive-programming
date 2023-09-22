@@ -11,7 +11,7 @@ namespace impl {
  */
 
 // 128bit multiply function
-static inline void _wymum(uint64_t *A, uint64_t *B) {
+static inline void _wymum(uint64_t* A, uint64_t* B) {
   __uint128_t r = *A;
   r *= *B;
   *A = (uint64_t)r;
@@ -25,23 +25,23 @@ static inline uint64_t _wymix(uint64_t A, uint64_t B) {
 }
 
 // read functions
-static inline uint64_t _wyr8(const uint8_t *p) {
+static inline uint64_t _wyr8(const uint8_t* p) {
   uint64_t v;
   memcpy(&v, p, 8);
   return v;
 }
-static inline uint64_t _wyr4(const uint8_t *p) {
+static inline uint64_t _wyr4(const uint8_t* p) {
   uint32_t v;
   memcpy(&v, p, 4);
   return v;
 }
-static inline uint64_t _wyr3(const uint8_t *p, size_t k) {
+static inline uint64_t _wyr3(const uint8_t* p, size_t k) {
   return (((uint64_t)p[0]) << 16) | (((uint64_t)p[k >> 1]) << 8) | p[k - 1];
 }
 
 // wyhash main function
-static inline uint64_t wyhash(const void *key, size_t len, uint64_t seed, const uint64_t *secret) {
-  const uint8_t *p = (const uint8_t *)key;
+static inline uint64_t wyhash(const void* key, size_t len, uint64_t seed, const uint64_t* secret) {
+  const uint8_t* p = (const uint8_t*)key;
   seed ^= *secret;
   uint64_t a, b;
   if (__builtin_expect(len <= 16, true)) {
@@ -115,7 +115,7 @@ uint64_t gen_random_seed() {
  *
  * \see WyHash<std::string> an example of implementing WyHash specialization using this function.
  */
-static inline uint64_t wyhash_bytes(const void *key, size_t len) {
+static inline uint64_t wyhash_bytes(const void* key, size_t len) {
   static const uint64_t seed = impl::gen_random_seed();
   return impl::wyhash(key, len, seed, impl::_wyp);
 }
@@ -150,7 +150,7 @@ struct WyHash {};
 /** \brief WyHash specialization for `std::string`. */
 template <>
 struct WyHash<std::string> {
-  size_t operator()(const std::string &s) const { return wyhash_bytes(s.c_str(), s.size()); }
+  size_t operator()(const std::string& s) const { return wyhash_bytes(s.c_str(), s.size()); }
 };
 
 /**
@@ -162,15 +162,15 @@ template <typename T1, typename T2>
 struct WyHash<std::pair<T1, T2>> {
   WyHash<T1> first_hash;
   WyHash<T2> second_hash;
-  size_t operator()(const std::pair<T1, T2> &p) const {
+  size_t operator()(const std::pair<T1, T2>& p) const {
     return wyhash_combine(first_hash(p.first), second_hash(p.second));
   }
 };
 
-#define _wyhash_for_integral_type(T)                                             \
-  template <>                                                                    \
-  struct WyHash<T> {                                                             \
-    size_t operator()(T t) const { return wyhash_bytes((void *)&t, sizeof(T)); } \
+#define _wyhash_for_integral_type(T)                                            \
+  template <>                                                                   \
+  struct WyHash<T> {                                                            \
+    size_t operator()(T t) const { return wyhash_bytes((void*)&t, sizeof(T)); } \
   };
 
 _wyhash_for_integral_type(bool) _wyhash_for_integral_type(char) _wyhash_for_integral_type(unsigned char)

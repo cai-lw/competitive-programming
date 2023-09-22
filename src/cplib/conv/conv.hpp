@@ -12,7 +12,7 @@ namespace impl {
 inline bool conv_naive_is_efficient(std::size_t n, std::size_t m) { return std::min(n, m) <= 32; }
 
 template <typename T>
-void conv_naive_inplace(std::vector<T> &a, const std::vector<T> &b) {
+void conv_naive_inplace(std::vector<T>& a, const std::vector<T>& b) {
   if (a.empty() || b.empty()) {
     a.clear();
     return;
@@ -34,7 +34,7 @@ void conv_naive_inplace(std::vector<T> &a, const std::vector<T> &b) {
 }
 
 template <typename T>
-void conv_fft_inplace2(std::vector<T> &a, std::vector<T> &b) {
+void conv_fft_inplace2(std::vector<T>& a, std::vector<T>& b) {
   using usize = std::size_t;
   usize out_size = a.size() + b.size() - 1;
   usize padded_out_size = port::bit_ceil(out_size);
@@ -65,7 +65,7 @@ void conv_fft_inplace2(std::vector<T> &a, std::vector<T> &b) {
  * \tparam T See fft_inplace() for requirements for `T`.
  */
 template <typename T>
-void convolve_inplace2(std::vector<T> &a, std::vector<T> &b) {
+void convolve_inplace2(std::vector<T>& a, std::vector<T>& b) {
   if (impl::conv_naive_is_efficient(a.size(), b.size())) {
     impl::conv_naive_inplace(a, b);
   } else {
@@ -82,7 +82,7 @@ void convolve_inplace2(std::vector<T> &a, std::vector<T> &b) {
  * \see convolve_inplace2() for details
  */
 template <typename T>
-void convolve_inplace(std::vector<T> &a, const std::vector<T> &b) {
+void convolve_inplace(std::vector<T>& a, const std::vector<T>& b) {
   if (impl::conv_naive_is_efficient(a.size(), b.size())) {
     impl::conv_naive_inplace(a, b);
   } else {
@@ -97,7 +97,7 @@ void convolve_inplace(std::vector<T> &a, const std::vector<T> &b) {
  * \see convolve_inplace2() for details.
  */
 template <typename T>
-std::vector<T> convolve(const std::vector<T> &a, const std::vector<T> &b) {
+std::vector<T> convolve(const std::vector<T>& a, const std::vector<T>& b) {
   auto a_copy = a;
   convolve_inplace(a_copy, b);
   return a_copy;

@@ -9,13 +9,13 @@ using namespace cplib;
 struct KeyValue {
   uint64_t key;
   uint64_t value;
-  bool operator==(const KeyValue &rhs) const { return key == rhs.key; }
+  bool operator==(const KeyValue& rhs) const { return key == rhs.key; }
 };
 
 template <>
 struct cplib::WyHash<KeyValue> {
   WyHash<uint64_t> hash;
-  size_t operator()(const KeyValue &x) const { return hash(x.key); }
+  size_t operator()(const KeyValue& x) const { return hash(x.key); }
 };
 
 int main() {

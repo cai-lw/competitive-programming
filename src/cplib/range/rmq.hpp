@@ -52,7 +52,7 @@ class RangeMinBlock {
 template <typename T, typename Comp>
 struct MinOp {
   Comp comp;
-  const T &operator()(const T &a, const T &b) const { return std::min(a, b, comp); }
+  const T& operator()(const T& a, const T& b) const { return std::min(a, b, comp); }
 };
 
 }  // namespace impl
@@ -79,10 +79,10 @@ class RangeMinQuery {
   RangeMinQuery() = default;
 
   /** \copydoc RangeMinQuery::RangeMinQuery(InputIt, InputIt) */
-  RangeMinQuery(const std::vector<T> &arr) : data(arr) { _build(); }
+  RangeMinQuery(const std::vector<T>& arr) : data(arr) { _build(); }
 
   /** \copydoc RangeMinQuery::RangeMinQuery(InputIt, InputIt) */
-  RangeMinQuery(std::vector<T> &&arr) : data(std::move(arr)) { _build(); }
+  RangeMinQuery(std::vector<T>&& arr) : data(std::move(arr)) { _build(); }
 
   /**
    * \brief Construct the range minumum query object from the given sequence.
@@ -141,9 +141,9 @@ class RangeMinQuery {
     }
     int left_block_idx = blocks[left_block].min_idx_inclusive(left % block_size, block_size - 1);
     int right_block_idx = blocks[right_block].min_idx_inclusive(0, right % block_size);
-    const T &left_block_min = data[left_block * block_size + left_block_idx];
-    const T &right_block_min = data[right_block * block_size + right_block_idx];
-    const T &lr_block_min = std::min(left_block_min, right_block_min, comp);
+    const T& left_block_min = data[left_block * block_size + left_block_idx];
+    const T& right_block_min = data[right_block * block_size + right_block_idx];
+    const T& lr_block_min = std::min(left_block_min, right_block_min, comp);
     if (left_block + 1 == right_block) {
       return lr_block_min;
     } else {

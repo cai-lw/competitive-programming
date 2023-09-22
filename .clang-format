@@ -2,3 +2,5 @@
 Language: Cpp
 BasedOnStyle: Google
 ColumnLimit: 120
+DerivePointerAlignment: false
+PointerAlignment: Left

@@ -12,7 +12,7 @@ int main() {
   size_t n, q;
   cin >> n >> q;
   vector<uint32_t> a(n);
-  for (auto &x : a) {
+  for (auto& x : a) {
     cin >> x;
   }
   RangeMinQuery<uint32_t> rmq(move(a));

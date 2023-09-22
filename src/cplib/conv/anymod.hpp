@@ -9,14 +9,14 @@ namespace cplib {
 namespace impl {
 
 template <typename In, typename Out>
-std::vector<Out> convolve_modint(const std::vector<In> &a, const std::vector<In> &b) {
+std::vector<Out> convolve_modint(const std::vector<In>& a, const std::vector<In>& b) {
   std::vector<Out> a_modint, b_modint;
   a_modint.reserve(a.size());
-  for (const In &x : a) {
+  for (const In& x : a) {
     a_modint.emplace_back(x.val());
   }
   b_modint.reserve(b.size());
-  for (const In &x : b) {
+  for (const In& x : b) {
     b_modint.emplace_back(x.val());
   }
   convolve_inplace2(a_modint, b_modint);
@@ -24,7 +24,7 @@ std::vector<Out> convolve_modint(const std::vector<In> &a, const std::vector<In>
 }
 
 template <typename In, typename Out, typename ModInt1, typename ModInt2>
-std::vector<Out> convolve_with_two_modints(const std::vector<In> &a, const std::vector<In> &b) {
+std::vector<Out> convolve_with_two_modints(const std::vector<In>& a, const std::vector<In>& b) {
   std::vector<ModInt1> m1 = convolve_modint<In, ModInt1>(a, b);
   std::vector<ModInt2> m2 = convolve_modint<In, ModInt2>(a, b);
   std::vector<Out> ret;
@@ -66,7 +66,7 @@ struct radix2_fft_root<MMInt64<4242390848983007233>> {
  * \tparam ModInt A modint type. The only requirements are `operator+`, `opeartor*`, and conversion from `uint64_t`.
  */
 template <typename ModInt>
-void convolve_any_modint_inplace(std::vector<ModInt> &a, const std::vector<ModInt> &b) {
+void convolve_any_modint_inplace(std::vector<ModInt>& a, const std::vector<ModInt>& b) {
   if (impl::conv_naive_is_efficient(a.size(), b.size())) {
     impl::conv_naive_inplace(a, b);
     return;
@@ -86,7 +86,7 @@ void convolve_any_modint_inplace(std::vector<ModInt> &a, const std::vector<ModIn
  * \see convolve_any_modint_inplace() for details.
  */
 template <typename ModInt>
-std::vector<ModInt> convolve_any_modint(const std::vector<ModInt> &a, const std::vector<ModInt> &b) {
+std::vector<ModInt> convolve_any_modint(const std::vector<ModInt>& a, const std::vector<ModInt>& b) {
   std::vector<ModInt> a_copy = a;
   convolve_any_modint_inplace(a_copy, b);
   return a_copy;

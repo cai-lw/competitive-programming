@@ -11,15 +11,15 @@ namespace impl {
 // Left-child right-sibling representation of the pairing heap
 template <typename T>
 struct PairingHeapNode {
-  PairingHeapNode(const T &val) : _val(val), left(nullptr), right(nullptr), parent(nullptr) {}
+  PairingHeapNode(const T& val) : _val(val), left(nullptr), right(nullptr), parent(nullptr) {}
 
-  PairingHeapNode(T &&val) : _val(std::move(val)), left(nullptr), right(nullptr), parent(nullptr) {}
+  PairingHeapNode(T&& val) : _val(std::move(val)), left(nullptr), right(nullptr), parent(nullptr) {}
 
   template <typename... Args, typename = decltype(T(std::declval<Args>()...))>
-  PairingHeapNode(Args &&...args) : _val(std::forward<Args>(args)...), left(nullptr), right(nullptr), parent(nullptr) {}
+  PairingHeapNode(Args&&... args) : _val(std::forward<Args>(args)...), left(nullptr), right(nullptr), parent(nullptr) {}
 
   // Add `child` as the youngest child (first in the sibling list). Both `this` and `child` must be root nodes.
-  void adopt(PairingHeapNode *child) {
+  void adopt(PairingHeapNode* child) {
     if (!child) {
       return;
     }
@@ -76,19 +76,19 @@ struct PairingHeap {
   PairingHeap() : root(nullptr), _size(0), comp() {}
 
   struct iterator {
-    const T &operator*() { return node->_val; }
+    const T& operator*() { return node->_val; }
 
-    const T *operator->() { return &node->_val; }
+    const T* operator->() { return &node->_val; }
 
-    bool operator==(const iterator &rhs) const { return node == rhs.node; }
+    bool operator==(const iterator& rhs) const { return node == rhs.node; }
 
-    bool operator!=(const iterator &rhs) const { return node != rhs.node; }
+    bool operator!=(const iterator& rhs) const { return node != rhs.node; }
 
    private:
     friend PairingHeap;
-    node_type *node;
+    node_type* node;
 
-    iterator(node_type *node) : node(node) {}
+    iterator(node_type* node) : node(node) {}
   };
 
   /** \brief Returns the number of elements. */
@@ -98,7 +98,7 @@ struct PairingHeap {
   bool empty() const { return !root; }
 
   /** \brief Returns the top element. The heap must be non-empty. */
-  const T &top() { return root->_val; }
+  const T& top() { return root->_val; }
 
   /** \brief Returns an iterator to the top element, or a null-pointer iterator if the heap is empty. */
   iterator begin() { return iterator(root); }
@@ -111,14 +111,14 @@ struct PairingHeap {
    *
    * \f$O(1)\f$ worst-case latency and \f$O(\log N)\f$ amortized cost.
    */
-  iterator push(const T &t) {
+  iterator push(const T& t) {
     auto node = new node_type(t);
     _merge_with(node, 1);
     return iterator(node);
   }
 
   /** \copydoc push(const T&) */
-  iterator push(T &&t) {
+  iterator push(T&& t) {
     auto node = new node_type(std::move(t));
     _merge_with(node, 1);
     return iterator(node);
@@ -127,7 +127,7 @@ struct PairingHeap {
   /** \brief Construct a new element in place in the heap.
    * \copydetails push(const T&) */
   template <typename... Args>
-  iterator emplace(Args &&...args) {
+  iterator emplace(Args&&... args) {
     auto node = new node_type(std::forward<Args>(args)...);
     _merge_with(node, 1);
     return iterator(node);
@@ -146,8 +146,8 @@ struct PairingHeap {
       root = nullptr;
       return;
     }
-    auto *curr = root->left;
-    node_type *last = nullptr;
+    auto* curr = root->left;
+    node_type* last = nullptr;
     delete root;
     // Merge in pairs, following the forward (`right`) linked list, and creating a backward (`parent`) linked list
     while (true) {
@@ -189,7 +189,7 @@ struct PairingHeap {
    * The other heap is emptied and all of its elements are added to this heap. Iterators to elements in the other heap
    * remain valid. \f$O(1)\f$ worst-case latency and amortized cost.
    */
-  void merge(PairingHeap &&other) {
+  void merge(PairingHeap&& other) {
     _merge_with(other.root, other.size());
     other._size = 0;
     other.root = nullptr;
@@ -201,7 +201,7 @@ struct PairingHeap {
    * The new value must be no greater than the current value compared by `Comp`.
    * \f$O(1)\f$ worst-case latency and \f$o(\log N)\f$ amortized cost.
    */
-  void decrease_key(iterator it, const T &new_key) {
+  void decrease_key(iterator it, const T& new_key) {
     if (it.node != root) {
       it.node->detach();
       it.node->_val = new_key;
@@ -227,11 +227,11 @@ struct PairingHeap {
   }
 
  private:
-  node_type *root;
+  node_type* root;
   size_type _size;
   Comp comp;
 
-  node_type *_merge_node(node_type *node1, node_type *node2) {
+  node_type* _merge_node(node_type* node1, node_type* node2) {
     if (!node1) {
       return node2;
     } else if (!node2) {
@@ -244,7 +244,7 @@ struct PairingHeap {
     return node2;
   }
 
-  void _merge_with(node_type *other, size_type size_incr) {
+  void _merge_with(node_type* other, size_type size_incr) {
     root = _merge_node(root, other);
     _size += size_incr;
   }

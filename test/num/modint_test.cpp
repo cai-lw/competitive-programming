@@ -1,12 +1,12 @@
-#include "cplib/num/mmint.hpp"
-
 #include "catch2/catch_template_test_macros.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "cplib/num/bmint.hpp"
+#include "cplib/num/mmint.hpp"
 using namespace std;
 using namespace cplib;
 
-TEST_CASE("Basic arithmetics with Montgomery modular integer", "[mmint]") {
-  using mint = MMInt<998244353>;
+TEMPLATE_TEST_CASE("Basic arithmetics with modular integer", "[modint]", MMInt<998244353>, BMInt<998244353>) {
+  using mint = TestType;
   CHECK(mint::mod() == 998244353u);
   CHECK(mint().val() == 0u);
   CHECK(mint(42).val() == 42u);
@@ -42,7 +42,8 @@ TEST_CASE("Basic arithmetics with Montgomery modular integer", "[mmint]") {
   CHECK((test *= mint(6)).val() == 42u);
 }
 
-TEMPLATE_TEST_CASE("Identities with Montgomery modular integer", "[mmint]", MMInt<998244353>, MMInt<4294967291>) {
+TEMPLATE_TEST_CASE("Identities with modular integer", "[modint]", MMInt<998244353>, MMInt<4294967291>,
+                   BMInt<4294967291>) {
   using mint = TestType;
   // Factorial
   unsigned long long fac = 1;
@@ -70,8 +71,24 @@ TEMPLATE_TEST_CASE("Identities with Montgomery modular integer", "[mmint]", MMIn
   }
 }
 
-TEST_CASE("Dynamic Montgomery modular integer", "[mmint]") {
-  using mint = DynamicMMInt30;
+TEMPLATE_TEST_CASE("Power of 2 with 64-bit modular integer", "[modint]", MMInt64<uint64_t(-59)>,
+                   BMInt64<uint64_t(-59)>) {
+  using mint = TestType;
+  const uint64_t n = mint::mod();
+  uint64_t x = 2;
+  mint y(2);
+  for (int e = 2; e <= 1024; e *= 2) {
+    y *= y;
+    for (int i = e / 2; i < e; i++) {
+      uint64_t x2 = x - (n - x);
+      x = x2 > x ? x2 + n : x2;
+    }
+    CHECK(y.val() == x);
+  }
+}
+
+TEMPLATE_TEST_CASE("Dynamic Montgomery modular integer", "[modint]", DynamicMMInt30, DynamicMMInt32, DynamicBMInt) {
+  using mint = TestType;
   // Start as mod 11
   auto _guard = mint::set_mod_guard(11);
   CHECK(mint::mod() == 11u);

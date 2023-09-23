@@ -1,6 +1,6 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
 
+cd $(git rev-parse --show-toplevel)
 git branch -f gh-pages main
 git switch gh-pages
 doxygen

@@ -16,7 +16,7 @@ add_executable(run_tests
     test/order/dary_heap_test.cpp
     test/order/pairing_heap_test.cpp
     test/num/gcd_test.cpp
-    test/num/mmint_test.cpp
+    test/num/modint_test.cpp
     test/num/sqrt_test.cpp
     test/num/prime_test.cpp
     test/num/primitive_root_test.cpp
@@ -26,7 +26,7 @@ add_executable(run_tests
     test/conv/anymod_test.cpp
 )
 
-add_subdirectory(Catch2)
+add_subdirectory(Catch2 EXCLUDE_FROM_ALL)
 target_link_libraries(run_tests PRIVATE Catch2WithMain)
 target_include_directories(run_tests PRIVATE src)
 

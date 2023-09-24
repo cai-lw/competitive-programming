@@ -11,7 +11,7 @@ namespace cplib {
  * Returns the product of two multivariate FPSs, with both inputs and the output truncated to the same shape. Formally,
  * this returns \f$H\f$ where
  * \f[
- * H(x_1,x_2,\dots,x_k)=F(x_1,x_2,\dots,x_k)G(x_1,x_2,\dots,x_k)\pmod{(x_1^{n_1},x_2^{n_2},\dots ,x_k^{n_k})}
+ * H(x_1,x_2,\dots,x_k)\equiv F(x_1,x_2,\dots,x_k)G(x_1,x_2,\dots,x_k)\pmod{(x_1^{n_1},x_2^{n_2},\dots ,x_k^{n_k})}
  * \f]
  *
  * Coefficients of \f$F,G,H\f$ are given as \f$n_1\times n_2\times \dots\times n_k\f$ multi-dimensional arrays,

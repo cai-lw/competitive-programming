@@ -73,9 +73,9 @@ void factorize_work(FactorizationResult<T>& result) {
   }
   if (f == 0) {
     if (n < (1ull << 32)) {
-      f = visit_by_modulus([](auto mint) { return pollard_rho_modint<decltype(mint)>(); }, uint32_t(n));
+      f = mmint_by_modulus([](auto mint) { return pollard_rho_modint<decltype(mint)>(); }, uint32_t(n));
     } else {
-      f = visit_by_modulus([](auto mint) { return pollard_rho_modint<decltype(mint)>(); }, n);
+      f = mmint_by_modulus([](auto mint) { return pollard_rho_modint<decltype(mint)>(); }, n);
     }
   }
   result.factors.push_back(f);

@@ -72,7 +72,7 @@ std::optional<T> sqrt_mod_prime(T n, T p) {
     // Cannot use MontgomeryModInt since 2 is even.
     return n % 2;
   }
-  return visit_by_modulus(
+  return mmint_by_modulus(
       [](const auto& n_mod_p) {
         auto ret = sqrt_mod_fp(n_mod_p);
         return ret ? ret->val() : std::optional<T>();

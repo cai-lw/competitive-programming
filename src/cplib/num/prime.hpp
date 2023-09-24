@@ -79,7 +79,7 @@ static uint32_t prime_or_factor_32(uint32_t n) {
   if (g != 1) {
     return g != n ? g : 0;
   }
-  return visit_by_modulus([](auto mint) { return miller_rabin_32<decltype(mint)>(); }, n);
+  return mmint_by_modulus([](auto mint) { return miller_rabin_32<decltype(mint)>(); }, n);
 }
 
 static uint64_t prime_or_factor_64(uint64_t n) {
@@ -94,7 +94,7 @@ static uint64_t prime_or_factor_64(uint64_t n) {
   if (g != 1) {
     return g != n ? g : 0;
   }
-  return visit_by_modulus([](auto mint) { return miller_rabin_64<decltype(mint)>(); }, n);
+  return mmint_by_modulus([](auto mint) { return miller_rabin_64<decltype(mint)>(); }, n);
 }
 
 }  // namespace impl

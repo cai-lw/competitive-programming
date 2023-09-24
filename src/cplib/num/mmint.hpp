@@ -367,16 +367,24 @@ using DynamicMMInt64 = MontgomeryModInt<impl::DynamicMontgomeryReductionContext<
  *
  * \related MontgomeryModInt
  */
-template <typename Visitor, typename UInt>
-auto visit_by_modulus(Visitor&& visitor, UInt mod, UInt x = 0) {
+template <typename Visitor, typename UInt, typename... Args>
+auto mmint_by_modulus(Visitor&& visitor, UInt mod, Args&&... args) {
   if (mod <= std::numeric_limits<UInt>::max() / 4) {
     using mint = MontgomeryModInt<impl::DynamicMontgomeryReductionContext<UInt, true>>;
     auto _guard = mint::set_mod_guard(mod);
-    return visitor(mint(x));
+    if constexpr (sizeof...(args) == 0) {
+      return visitor(mint());
+    } else {
+      return visitor(mint(args)...);
+    }
   } else {
     using mint = MontgomeryModInt<impl::DynamicMontgomeryReductionContext<UInt, false>>;
     auto _guard = mint::set_mod_guard(mod);
-    return visitor(mint(x));
+    if constexpr (sizeof...(args) == 0) {
+      return visitor(mint());
+    } else {
+      return visitor(mint(args)...);
+    }
   }
 };
 

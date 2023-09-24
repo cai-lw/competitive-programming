@@ -81,6 +81,8 @@ typename ModInt::int_type primitive_root_unfactorized_modint() {
  *
  * For the given prime \f$p\f$, returns any \f$0<g<p\f$ such that the minimum positive integer \f$k\f$ that satisfies
  * \f$g^k\equiv 1 \pmod{p}\f$ is \f$p-1\f$.
+ *
+ * \tparam T An unsigned integer type.
  */
 template <typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
 T primitive_root_prime(T p) {
@@ -88,7 +90,7 @@ T primitive_root_prime(T p) {
     // Cannot use MontgomeryModInt since 2 is even.
     return 1;
   }
-  return visit_by_modulus([&](auto mint) { return impl::primitive_root_modint<decltype(mint)>(p - 1); }, p);
+  return mmint_by_modulus([&](auto mint) { return impl::primitive_root_modint<decltype(mint)>(p - 1); }, p);
 }
 
 /**
@@ -98,6 +100,8 @@ T primitive_root_prime(T p) {
  * For any primitive root \f$g\f$ the minimum positive integer \f$k\f$ that satisfies \f$g^k\equiv 1 \pmod{n}\f$ is
  * \f$\phi(n)\f$ where \f$\phi\f$ is Euler's totient function. Primitive root exists if and only if \f$n=2,4,p^k,2p^k\f$
  * where \f$p\f$ is an odd prime and \f$k\geq 1\f$. This function returns `std::nullopt` if it does not exist.
+ *
+ * \tparam T An unsigned integer type.
  */
 template <typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
 std::optional<T> primitive_root(T n) {
@@ -115,7 +119,7 @@ std::optional<T> primitive_root(T n) {
   if (n % 2 == 0) {
     return std::nullopt;
   }
-  T g = visit_by_modulus([&](auto mint) { return impl::primitive_root_unfactorized_modint<decltype(mint)>(); }, n);
+  T g = mmint_by_modulus([&](auto mint) { return impl::primitive_root_unfactorized_modint<decltype(mint)>(); }, n);
   if (g == 0) {
     return std::nullopt;
   }

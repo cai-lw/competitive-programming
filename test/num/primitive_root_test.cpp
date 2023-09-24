@@ -2,7 +2,7 @@
 
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/generators/catch_generators.hpp"
-#include "cplib/num/mmint.hpp"
+#include "cplib/num/bmint.hpp"
 using namespace std;
 using namespace cplib;
 
@@ -36,12 +36,9 @@ TEST_CASE("Primitive root modulo large 32-bit numbers", "[primitive_root]") {
                TestParam{4283401138 /* =2*1289^3 */, 2140039048, {2, 7, 23, 1289}},
                TestParam{3939040643 /* =83^5 */, 3891582322, {2, 41, 83}},
                TestParam{3486784401 /* =3^20 */, 2324522934, {2, 3}});
-  using mint = DynamicMMInt32;
+  using mint = DynamicBMInt;
   auto result = primitive_root(param.n);
   REQUIRE(result);
-  if (param.n % 2 == 0) {
-    return;  // TODO: remove this after we have modint that supports even modulus
-  }
   auto _guard = mint::set_mod_guard(param.n);
   mint g(*result);
   CHECK(pow(g, param.phi) == mint(1));

@@ -1,7 +1,9 @@
 #include "catch2/catch_template_test_macros.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "cplib/num/bmint.hpp"
+#include "cplib/num/mint2p61m1.hpp"
 #include "cplib/num/mmint.hpp"
+
 using namespace std;
 using namespace cplib;
 
@@ -71,17 +73,21 @@ TEMPLATE_TEST_CASE("Identities with modular integer", "[modint]", MMInt<99824435
   }
 }
 
-TEMPLATE_TEST_CASE("Power of 2 with 64-bit modular integer", "[modint]", MMInt64<uint64_t(-59)>,
-                   BMInt64<uint64_t(-59)>) {
+TEMPLATE_TEST_CASE("Power of 3 with 64-bit modular integer", "[modint]", MMInt64<uint64_t(-59)>,
+                   BMInt64<uint64_t(-59)>, ModInt2P61M1) {
   using mint = TestType;
   const uint64_t n = mint::mod();
-  uint64_t x = 2;
-  mint y(2);
+  uint64_t x = 3;
+  mint y(3);
   for (int e = 2; e <= 1024; e *= 2) {
     y *= y;
     for (int i = e / 2; i < e; i++) {
       uint64_t x2 = x - (n - x);
-      x = x2 > x ? x2 + n : x2;
+      if (x2 > x) {
+        x2 += n;
+      }
+      uint64_t x3 = x2 - (n - x);
+      x = x3 > x2 ? x3 + n : x3;
     }
     CHECK(y.val() == x);
   }

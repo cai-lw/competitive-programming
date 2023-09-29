@@ -162,7 +162,7 @@ class BarrettModInt {
   /**
    * \brief Returns a number that is the same for the same residue class modulo the modulus.
    *
-   * This is the same as val(), unlike BarrettModInt.
+   * This is the same as val(), unlike MontgomeryModInt.
    */
   int_type residue() const { return val_; }
 
@@ -217,7 +217,7 @@ class BarrettModInt {
   /**
    * \brief Returns the modular inverse.
    *
-   * Requires the underlying value to be invertible, i.e. coprime with the modulus.
+   * The underlying value must be non-zero.
    */
   mint inv() const { return from_raw(mod_inverse(val_, br().mod())); }
 

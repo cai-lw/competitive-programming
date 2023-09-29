@@ -184,7 +184,7 @@ class DynamicMontgomeryReductionContext {
  * We keep everything in \f$[0,2N)\f$ instead of \f$[0,N)\f$. The result of multiplication-Montgomery reduction of
  * two numbers less than \f$2N\f$, even without the final reduction step, is already less than
  * \f$((2N)(2N)+NR)/R=N(4N/R)+N<2N\f$, thus the final reduction step is not needed.
- * 
+ *
  * \sa BarrettModInt
  */
 template <typename Context>

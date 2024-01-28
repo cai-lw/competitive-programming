@@ -15,6 +15,7 @@ add_executable(run_tests
     order/pairing_heap_test.cpp
     range/bit_dict_test.cpp
     range/rmq_test.cpp
+    range/batch_static_queries_test.cpp
     range/wavelet_array_test.cpp
 )
 

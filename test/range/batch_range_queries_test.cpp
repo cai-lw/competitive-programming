@@ -1,4 +1,4 @@
-#include "cplib/range/batch_static_queries.hpp"
+#include "cplib/range/batch_range_queries.hpp"
 
 #include <vector>
 
@@ -22,6 +22,6 @@ TEST_CASE("Static range sum query") {
       {data.begin() + 5, data.begin() + 5}, {data.begin(), data.end()},
   };
   RangeSum range;
-  auto ans = batch_static_queries(range, queries);
+  auto ans = batch_range_queries(range, queries);
   CHECK(ans == vector<int>{8, 11, 5, 0, 36});
 }

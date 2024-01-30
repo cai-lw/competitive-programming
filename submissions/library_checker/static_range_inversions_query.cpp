@@ -4,7 +4,7 @@
 
 #include <atcoder/fenwicktree>
 
-#include "cplib/range/batch_static_queries.hpp"
+#include "cplib/range/batch_range_queries.hpp"
 using namespace std;
 using namespace cplib;
 
@@ -62,7 +62,7 @@ int main() {
     qs.emplace_back(arr.begin() + l, arr.begin() + r);
   }
   RangeInversionQuery range(arr_unique.size());
-  auto ans = batch_static_queries(range, qs);
+  auto ans = batch_range_queries(range, qs);
   for (auto x : ans) {
     cout << x << '\n';
   }

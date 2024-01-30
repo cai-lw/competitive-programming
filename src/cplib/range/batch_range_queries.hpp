@@ -13,8 +13,8 @@ template <typename Range, typename Element>
 inline constexpr bool is_static_query_range_v = std::is_invocable_v<decltype(&Range::push_front), Range&, Element> &&
                                                 std::is_invocable_v<decltype(&Range::pop_front), Range&, Element> &&
                                                 std::is_invocable_v<decltype(&Range::push_back), Range&, Element> &&
-                                                std::is_invocable_v<decltype(&Range::push_back), Range&, Element> &&
-                                                std::is_invocable_r_v<Element, decltype(&Range::get), Range&>;
+                                                std::is_invocable_v<decltype(&Range::pop_back), Range&, Element> &&
+                                                std::is_invocable_v<decltype(&Range::get), Range&>;
 
 }
 
@@ -25,7 +25,7 @@ inline constexpr bool is_static_query_range_v = std::is_invocable_v<decltype(&Ra
  * Given a `Range` object that supports pushing and popping elements on both ends and querying some property about the
  * range it currently holds, this functions answers \f$Q\f$ range queries for that property given as subranges of a
  * range of length \f$N\f$, calling `Range`'s push/pop methods \f$O(Q\sqrt{N})\f$ times.
- * 
+ *
  * \tparam Range must have the following methods, where `T` is the value type of the queries' iterator type
  * * `void Range::push_front(const T&)`
  * * `void Range::push_back(const T&)`
@@ -36,7 +36,7 @@ inline constexpr bool is_static_query_range_v = std::is_invocable_v<decltype(&Ra
 template <typename RandomIt, typename Range,
           std::enable_if_t<impl::is_static_query_range_v<Range, typename std::iterator_traits<RandomIt>::value_type>>* =
               nullptr>
-std::vector<decltype(std::declval<Range>().get())> batch_static_queries(
+std::vector<decltype(std::declval<Range>().get())> batch_range_queries(
     Range& range, const std::vector<std::pair<RandomIt, RandomIt>>& queries) {
   if (queries.empty()) {
     return {};

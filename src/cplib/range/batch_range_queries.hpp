@@ -24,7 +24,7 @@ inline constexpr bool is_static_query_range_v = std::is_invocable_v<decltype(&Ra
  *
  * Given a `Range` object that supports pushing and popping elements on both ends and querying some property about the
  * range it currently holds, this functions answers \f$Q\f$ range queries for that property given as subranges of a
- * range of length \f$N\f$, calling `Range`'s push/pop methods \f$O(Q\sqrt{N})\f$ times.
+ * range of length \f$N\f$, calling `Range`'s push/pop methods \f$O(N\sqrt{Q})\f$ times.
  *
  * \tparam Range must have the following methods, where `T` is the value type of the queries' iterator type
  * * `void Range::push_front(const T&)`

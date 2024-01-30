@@ -171,13 +171,20 @@ struct WyHash<std::pair<T1, T2>> {
   template <>                                                                   \
   struct WyHash<T> {                                                            \
     size_t operator()(T t) const { return wyhash_bytes((void*)&t, sizeof(T)); } \
-  };
+  }
 
-_wyhash_for_integral_type(bool) _wyhash_for_integral_type(char) _wyhash_for_integral_type(unsigned char)
-    _wyhash_for_integral_type(signed char) _wyhash_for_integral_type(short) _wyhash_for_integral_type(unsigned short)
-        _wyhash_for_integral_type(int) _wyhash_for_integral_type(unsigned int) _wyhash_for_integral_type(long)
-            _wyhash_for_integral_type(unsigned long) _wyhash_for_integral_type(long long)
-                _wyhash_for_integral_type(unsigned long long)
+_wyhash_for_integral_type(bool);
+_wyhash_for_integral_type(char);
+_wyhash_for_integral_type(unsigned char);
+_wyhash_for_integral_type(signed char);
+_wyhash_for_integral_type(short);
+_wyhash_for_integral_type(unsigned short);
+_wyhash_for_integral_type(int);
+_wyhash_for_integral_type(unsigned int);
+_wyhash_for_integral_type(long);
+_wyhash_for_integral_type(unsigned long);
+_wyhash_for_integral_type(long long);
+_wyhash_for_integral_type(unsigned long long);
 
 #undef _wyhash_for_integral_type
 
